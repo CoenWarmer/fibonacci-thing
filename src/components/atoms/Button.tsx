@@ -1,18 +1,28 @@
-import * as React from 'react';
-import NextLink from 'next/link';
-import type * as types from 'types';
+import { memo } from 'react';
 
-import MuiButton from '@mui/material/Button';
-
-export type Props = types.Button & types.StackbitFieldPath & { className?: string; sx?: { [key: string]: any } };
-
-export const Button: React.FC<Props> = (props) => {
-    const { className, label, url, size = 'medium', variant = 'text', color = 'primary', sx, 'data-sb-field-path': fieldPath } = props;
-    const annotations = fieldPath ? [fieldPath, `${fieldPath}.url#@href`].join(' ').trim() : null;
-
+export const Button = memo(({ value, active, onClick }: { value: number; active: boolean; onClick: () => void }) => {
     return (
-        <MuiButton component={NextLink} href={url} className={className} variant={variant} size={size} color={color} sx={{ borderRadius: '2px', ...sx }} data-sb-field-path={annotations}>
-            <span data-sb-field-path=".label">{label}</span>
-        </MuiButton>
+        <button
+            onClick={onClick}
+            style={{
+                margin: '0 1px 1px 0',
+                padding: '0',
+                width: '22px',
+                height: '22px',
+                minWidth: 'auto',
+                fontSize: '8px',
+                borderColor: '#7394ec',
+                backgroundColor: active ? 'green' : '#4b69b7',
+                color: '#fff',
+                boxShadow: 'none',
+                borderRadius: '2px',
+                border: 'none',
+                cursor: 'pointer'
+            }}
+        >
+            {String(value)}
+        </button>
     );
-};
+});
+
+Button.displayName = 'MemoizedButton';

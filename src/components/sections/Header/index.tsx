@@ -12,12 +12,19 @@ export type Props = types.Header & types.StackbitObjectId;
 export const Header: React.FC<Props> = (props) => {
     const { title, navLinks = [], 'data-sb-object-id': objectId } = props;
     const fieldPath = objectId ? `${objectId}:header` : null;
+
     return (
         <MuiAppBar position="static" color="transparent" elevation={0} data-sb-field-path={fieldPath}>
             <MuiToolbar disableGutters={true} sx={{ flexWrap: 'wrap' }}>
                 {title && (
                     <MuiBox sx={{ mb: 1, mr: 2, flexGrow: 1 }}>
-                        <MuiTypography component="p" variant="h6" color="text.primary" noWrap data-sb-field-path=".title">
+                        <MuiTypography
+                            component="h1"
+                            variant="h4"
+                            color="text.primary"
+                            noWrap
+                            data-sb-field-path=".title"
+                        >
                             {title}
                         </MuiTypography>
                     </MuiBox>

@@ -8,7 +8,11 @@ export const Markdown: FC<Props> = (props) => {
     const { text, className, 'data-sb-field-path': fieldPath } = props;
 
     return (
-        <MarkdownToJsx options={{ forceBlock: true, forceWrapper: true }} className={className} data-sb-field-path={fieldPath}>
+        <MarkdownToJsx
+            options={{ forceBlock: true, forceWrapper: true }}
+            className={className}
+            data-sb-field-path={fieldPath}
+        >
             {text}
         </MarkdownToJsx>
     );
