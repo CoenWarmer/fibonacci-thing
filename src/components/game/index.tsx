@@ -42,6 +42,7 @@ export function Game() {
     };
 
     useEffect(() => {
+        let timer: NodeJS.Timeout;
         const checkRowsAndColsForFibonacci = (matrix: number[][]) => {
             const found: SequenceFoundResultObj = {
                 row: [],
@@ -91,7 +92,33 @@ export function Game() {
 
         if (result.col.length || result.row.length) {
             setResults(result);
+
+            // Now that we have results, we need to clear them after 5 seconds.
+            // Start building a cleaned matrix
+            const newMatrix: number[][] = [];
+
+            for (let i = 0; i < matrix.length; i++) {
+                if (isPartOfSequence(i, 0, result)) {
+                    newMatrix.push(Array(GRID_SIZE).fill(0));
+                }
+                newMatrix.push(matrix[i]);
+
+                for (let j = 0; j < matrix[i].length; j++) {
+                    if (isPartOfSequence(i, j, result)) {
+                        newMatrix[i][j] = 0;
+                    }
+                }
+
+                // Clear results on a timeout
+                timer = setTimeout(() => {
+                    setResults(undefined);
+                    setMatrix(newMatrix);
+                }, 5000);
+            }
         }
+        return () => {
+            clearTimeout(timer);
+        };
     }, [matrix]);
 
     return (
@@ -112,9 +139,6 @@ export function Game() {
                     ))}
                 </div>
             ))}
-
-            <pre>{JSON.stringify(results?.row)}</pre>
-            <pre>{JSON.stringify(results?.col)}</pre>
         </div>
     );
 }
