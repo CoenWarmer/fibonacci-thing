@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import confetti from 'canvas-confetti';
+import { css } from '@emotion/react';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import confetti from 'canvas-confetti';
+import CountUp from 'react-countup';
 
 import { Button } from '../atoms/Button';
 import { findSequenceIndicesInArray } from '../../utils/findSequenceIndicesInArray';
 import { LegendLabel } from '../atoms/LegendLabel';
-import CountUp from 'react-countup';
 
 type SequenceFoundResultObj = {
     row: SequenceFoundResult[];
@@ -23,10 +24,13 @@ type SequenceFoundResult = {
 const GRID_SIZE = 50;
 const SEQUENCE_LENGTH = 5;
 const INITIALMATRIX = Array(GRID_SIZE).fill(Array(GRID_SIZE).fill(0));
+const MESSAGES = ['You got it, keep going!', 'Nice! Good job.', 'Great!', 'Awesome!', 'Amazing!'];
 
 export function Game() {
     const [matrix, setMatrix] = useState(INITIALMATRIX);
     const [results, setResults] = useState<SequenceFoundResultObj | undefined>();
+    const [message, setMessage] = useState('Click on the grid to start upping values.');
+    const [disabled, setDisabled] = useState(false);
 
     const handleClick = (x: number, y: number) => {
         const rows = matrix.length;
@@ -99,6 +103,8 @@ export function Game() {
         setResults(result);
 
         if (result.col.length || result.row.length) {
+            setDisabled(true);
+
             confetti({
                 particleCount: 300,
                 spread: 200,
@@ -142,6 +148,8 @@ export function Game() {
             timer = setTimeout(() => {
                 setMatrix(newMatrix);
                 setResults(undefined);
+                setMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
+                setDisabled(false);
             }, 5000);
         }
         return () => {
@@ -149,23 +157,33 @@ export function Game() {
         };
     }, [matrix]);
 
-    function isPartOfSequence(
-        x: number,
-        y: number,
-        results: SequenceFoundResultObj | undefined = undefined
-    ) {
-        if (!results) {
-            return false;
-        }
-
-        return (
-            isCoordinateInSequence(results.row, x, y) || isCoordinateInSequence(results.col, y, x)
-        );
-    }
+    const foundSequences = getTotalSequences(results);
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'end', marginBottom: 20 }}>
+            <div
+                css={css`
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin: 20px 0;
+                `}
+            >
+                <div
+                    css={css`
+                        margin-right: 20px;
+                    `}
+                >
+                    {results?.col.length || results?.row.length ? (
+                        <>
+                            Nice! Found {foundSequences} sequences. Resetting in...{' '}
+                            <CountUp start={5} end={0} duration={5} useEasing={false} />
+                        </>
+                    ) : (
+                        <>{message}</>
+                    )}
+                </div>
+
                 <Button
                     value={
                         <>
@@ -177,10 +195,6 @@ export function Game() {
                     onClick={handleResetState}
                 />
             </div>
-
-            {results?.col.length || results?.row.length ? (
-                <CountUp start={5} end={0} duration={5} useEasing={false} />
-            ) : null}
 
             <div style={{ display: 'flex' }}>
                 {matrix.map((_, y) => (
@@ -198,6 +212,7 @@ export function Game() {
                         <Button
                             key={x}
                             value={cell}
+                            disabled={disabled}
                             active={isPartOfSequence(x, y, results)}
                             onClick={() => handleClick(x, y)}
                         />
@@ -206,6 +221,20 @@ export function Game() {
             ))}
         </div>
     );
+}
+
+/* Utils */
+
+function isPartOfSequence(
+    x: number,
+    y: number,
+    results: SequenceFoundResultObj | undefined = undefined
+) {
+    if (!results) {
+        return false;
+    }
+
+    return isCoordinateInSequence(results.row, x, y) || isCoordinateInSequence(results.col, y, x);
 }
 
 function isCoordinateInSequence(foundSequences: SequenceFoundResult[], x: number, y: number) {
@@ -218,4 +247,20 @@ function isCoordinateInSequence(foundSequences: SequenceFoundResult[], x: number
             }
         }
     }
+}
+
+function getTotalSequences(results: SequenceFoundResultObj | undefined) {
+    if (!results) {
+        return 0;
+    }
+
+    const rowSequences = results?.row.reduce((acc, row) => {
+        return acc + row.sequences.length;
+    }, 0);
+
+    const colSequences = results?.col.reduce((acc, col) => {
+        return acc + col.sequences.length;
+    }, 0);
+
+    return rowSequences + colSequences;
 }
