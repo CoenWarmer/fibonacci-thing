@@ -5,6 +5,16 @@
         "title": "Fibonacci Thing"
     },
     "footer": {
-        "copyrightText": "© 2025 Coen Warmer - [github.com/coenwarmer](http://github.com/coenwarmer) - [linkedin.com/in/coenwarmer](http://linkedin.com/in/coenwarmer)"
+        "navLinks": [
+            {
+                "label": "github.com/coenwarmer",
+                "url": "http://github.com/coenwarmer"
+            },
+            {
+                "label": "linkedin.com/in/coenwarmer",
+                "url": "http://linkedin.com/in/coenwarmer"
+            }
+        ],
+        "copyrightText": "© 2025 Coen Warmer"
     }
 }

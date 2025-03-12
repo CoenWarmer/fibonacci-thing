@@ -24,12 +24,17 @@ export const Footer: React.FC<Props> = (props) => {
                     data-sb-field-path=".navLinks"
                 >
                     {navLinks.map((link, index) => (
-                        <Link key={index} {...link} sx={{ mr: 2 }} data-sb-field-path={`.${index}`} />
+                        <Link
+                            key={index}
+                            {...link}
+                            sx={{ mr: 2 }}
+                            data-sb-field-path={`.${index}`}
+                        />
                     ))}
                 </MuiBox>
             )}
             {copyrightText && (
-                <MuiTypography component="div" color="text.secondary">
+                <MuiTypography component="div" color="text.secondary" sx={{ color: '#999' }}>
                     <Markdown text={copyrightText} data-sb-field-path=".copyrightText" />
                 </MuiTypography>
             )}
