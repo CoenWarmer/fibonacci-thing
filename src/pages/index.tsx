@@ -15,17 +15,21 @@ export type Props = { page: types.Page; siteConfig: types.Config };
 const Page: React.FC<Props> = ({ page, siteConfig }) => {
     return (
         <MuiBox sx={{ px: 3 }} data-sb-object-id={page.__id}>
-            <MuiContainer maxWidth="lg" disableGutters={true}>
+            <MuiContainer maxWidth="lg" sx={{ width: 1150 }} disableGutters={true}>
                 <Head>
                     <title>{page.title}</title>
                     <meta name="viewport" content="width=device-width, initial-scale=1" />
                     {siteConfig.favicon && <link rel="icon" href={siteConfig.favicon} />}
                 </Head>
-                {siteConfig.header && <Header {...siteConfig.header} data-sb-object-id={siteConfig.__id} />}
+                {siteConfig.header && (
+                    <Header {...siteConfig.header} data-sb-object-id={siteConfig.__id} />
+                )}
 
                 <Game />
 
-                {siteConfig.footer && <Footer {...siteConfig.footer} data-sb-object-id={siteConfig.__id} />}
+                {siteConfig.footer && (
+                    <Footer {...siteConfig.footer} data-sb-object-id={siteConfig.__id} />
+                )}
             </MuiContainer>
         </MuiBox>
     );

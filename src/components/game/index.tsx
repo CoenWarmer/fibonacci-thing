@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
+import confetti from 'canvas-confetti';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+
 import { Button } from '../atoms/Button';
+import { findSequenceIndicesInArray } from '../../utils/findSequenceIndicesInArray';
+import { LegendLabel } from '../atoms/LegendLabel';
+import CountUp from 'react-countup';
 
 type SequenceFoundResultObj = {
     row: SequenceFoundResult[];
@@ -8,42 +14,48 @@ type SequenceFoundResultObj = {
 
 type SequenceFoundResult = {
     index: number;
-    startElement: number;
-    endElement: number;
+    sequences: {
+        start: number;
+        end: number;
+    }[];
 };
 
-const GRID_SIZE = 20;
-const FIBONACCI_SEQUENCE = [0, 1, 1, 2, 3];
-
-const initialMatrix = Array(GRID_SIZE).fill(Array(GRID_SIZE).fill(0));
+const GRID_SIZE = 50;
+const SEQUENCE_LENGTH = 5;
+const INITIALMATRIX = Array(GRID_SIZE).fill(Array(GRID_SIZE).fill(0));
 
 export function Game() {
-    const [matrix, setMatrix] = useState(initialMatrix);
-
+    const [matrix, setMatrix] = useState(INITIALMATRIX);
     const [results, setResults] = useState<SequenceFoundResultObj | undefined>();
 
-    const handleClick = (row: number, col: number) => {
+    const handleClick = (x: number, y: number) => {
         const rows = matrix.length;
         const cols = matrix[0].length;
 
         const newMatrix = matrix.map((r) => [...r]);
 
         // Increment row values by 1
-        for (let j = 0; j < cols; j++) {
-            newMatrix[row][j] = matrix[row][j] + 1;
+        for (let i = 0; i < rows; i++) {
+            newMatrix[i][x] = matrix[i][x] + 1;
         }
 
         // Increment column values by 1
-        for (let i = 0; i < rows; i++) {
-            newMatrix[i][col] = matrix[i][col] + 1;
+        for (let j = 0; j < cols; j++) {
+            newMatrix[y][j] = matrix[y][j] + 1;
         }
 
         setMatrix(newMatrix);
     };
 
+    const handleResetState = () => {
+        setMatrix(INITIALMATRIX);
+        setResults(undefined);
+    };
+
     useEffect(() => {
         let timer: NodeJS.Timeout;
-        const checkRowsAndColsForFibonacci = (matrix: number[][]) => {
+
+        const checkRowsAndColsForFibonacciSequences = (matrix: number[][]) => {
             const found: SequenceFoundResultObj = {
                 row: [],
                 col: []
@@ -53,13 +65,12 @@ export function Game() {
 
             for (let i = 0; i < rows; i++) {
                 // Check rows for the sequence
-                let firstFoundRowElement = findSequenceIndexInArray(matrix[i]);
+                const rowSequenceIndices = findSequenceIndicesInArray(matrix[i], SEQUENCE_LENGTH);
 
-                if (firstFoundRowElement !== -1) {
+                if (rowSequenceIndices.length) {
                     found.row = found.row.concat({
                         index: i,
-                        startElement: firstFoundRowElement,
-                        endElement: firstFoundRowElement + FIBONACCI_SEQUENCE.length - 1
+                        sequences: rowSequenceIndices
                     });
                 }
 
@@ -68,19 +79,14 @@ export function Game() {
 
                 for (let j = 0; j < matrix.length; j++) {
                     column.push(matrix[j][i]);
-
-                    if (column.length === GRID_SIZE) {
-                        break;
-                    }
                 }
 
-                let firstFoundColumnElement = findSequenceIndexInArray(column);
+                const columnSequenceIndices = findSequenceIndicesInArray(column, SEQUENCE_LENGTH);
 
-                if (firstFoundColumnElement !== -1) {
+                if (columnSequenceIndices.length) {
                     found.col = found.col.concat({
                         index: i,
-                        startElement: firstFoundColumnElement,
-                        endElement: firstFoundColumnElement + FIBONACCI_SEQUENCE.length - 1
+                        sequences: columnSequenceIndices
                     });
                 }
             }
@@ -88,50 +94,109 @@ export function Game() {
             return found;
         };
 
-        const result = checkRowsAndColsForFibonacci(matrix);
+        const result = checkRowsAndColsForFibonacciSequences(matrix);
+
+        setResults(result);
 
         if (result.col.length || result.row.length) {
-            setResults(result);
+            confetti({
+                particleCount: 300,
+                spread: 200,
+                origin: { x: 0.5, y: 0.5 }
+            });
 
             // Now that we have results, we need to clear them after 5 seconds.
             // Start building a cleaned matrix
-            const newMatrix: number[][] = [];
+            const newMatrix = matrix.map((r) => [...r]);
 
-            for (let i = 0; i < matrix.length; i++) {
-                if (isPartOfSequence(i, 0, result)) {
-                    newMatrix.push(Array(GRID_SIZE).fill(0));
-                }
-                newMatrix.push(matrix[i]);
+            // Taking the results object, fill the matrix with 0s
+            for (let rowIndex = 0; rowIndex < result.row.length; rowIndex++) {
+                const row = result.row[rowIndex];
 
-                for (let j = 0; j < matrix[i].length; j++) {
-                    if (isPartOfSequence(i, j, result)) {
-                        newMatrix[i][j] = 0;
+                for (let sequenceIndex = 0; sequenceIndex < row.sequences.length; sequenceIndex++) {
+                    const sequence = row.sequences[sequenceIndex];
+
+                    for (let i = sequence.start; i <= sequence.end; i++) {
+                        newMatrix[row.index][i] = 0;
                     }
                 }
-
-                // Clear results on a timeout
-                timer = setTimeout(() => {
-                    setResults(undefined);
-                    setMatrix(newMatrix);
-                }, 5000);
             }
+
+            for (let colIndex = 0; colIndex < result.col.length; colIndex++) {
+                const column = result.col[colIndex];
+
+                for (
+                    let sequenceIndex = 0;
+                    sequenceIndex < column.sequences.length;
+                    sequenceIndex++
+                ) {
+                    const sequence = column.sequences[sequenceIndex];
+
+                    for (let i = sequence.start; i <= sequence.end; i++) {
+                        newMatrix[i][column.index] = 0;
+                    }
+                }
+            }
+
+            // Clear results on a timeout
+            timer = setTimeout(() => {
+                setMatrix(newMatrix);
+                setResults(undefined);
+            }, 5000);
         }
         return () => {
             clearTimeout(timer);
         };
     }, [matrix]);
 
+    function isPartOfSequence(
+        x: number,
+        y: number,
+        results: SequenceFoundResultObj | undefined = undefined
+    ) {
+        if (!results) {
+            return false;
+        }
+
+        return (
+            isCoordinateInSequence(results.row, x, y) || isCoordinateInSequence(results.col, y, x)
+        );
+    }
+
     return (
         <div>
-            <span>
-                Searching for... <pre>[{FIBONACCI_SEQUENCE.join(', ')}]</pre>
-            </span>
+            <div style={{ display: 'flex', justifyContent: 'end', marginBottom: 20 }}>
+                <Button
+                    value={
+                        <>
+                            Reset
+                            <RestartAltIcon />
+                        </>
+                    }
+                    big
+                    onClick={handleResetState}
+                />
+            </div>
 
-            {matrix.map((row, x) => (
-                <div key={x}>
-                    {row.map((cell: number, y: number) => (
+            {results?.col.length || results?.row.length ? (
+                <CountUp start={5} end={0} duration={5} useEasing={false} />
+            ) : null}
+
+            <div style={{ display: 'flex' }}>
+                {matrix.map((_, y) => (
+                    <LegendLabel label={y} key={y} />
+                ))}
+            </div>
+
+            {matrix.map((col, y) => (
+                <div key={y}>
+                    <div style={{ position: 'absolute', marginLeft: -22, marginTop: 4 }}>
+                        <LegendLabel label={y} />
+                    </div>
+
+                    {col.map((cell: number, x: number) => (
                         <Button
-                            key={y}
+                            key={x}
                             value={cell}
                             active={isPartOfSequence(x, y, results)}
                             onClick={() => handleClick(x, y)}
@@ -143,24 +208,14 @@ export function Game() {
     );
 }
 
-function findSequenceIndexInArray(arr: number[]) {
-    if (arr.length < FIBONACCI_SEQUENCE.length || FIBONACCI_SEQUENCE.length === 0) return -1;
-
-    for (let i = 0; i <= arr.length - FIBONACCI_SEQUENCE.length; i++) {
-        if (arr.slice(i, i + FIBONACCI_SEQUENCE.length).every((val, index) => val === FIBONACCI_SEQUENCE[index])) {
-            return i;
+function isCoordinateInSequence(foundSequences: SequenceFoundResult[], x: number, y: number) {
+    for (const rowResult of foundSequences) {
+        if (rowResult.index === y) {
+            for (const sequence of rowResult.sequences) {
+                if (x >= sequence.start && x <= sequence.end) {
+                    return true;
+                }
+            }
         }
     }
-    return -1;
-}
-
-function isPartOfSequence(x: number, y: number, results: SequenceFoundResultObj | undefined = undefined) {
-    if (
-        results?.row.some((r) => r.index === x && y >= r.startElement && y <= r.endElement) ||
-        results?.col.some((c) => c.index === y && x >= c.startElement && x <= c.endElement)
-    ) {
-        return true;
-    }
-
-    return false;
 }
