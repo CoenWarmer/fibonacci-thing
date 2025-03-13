@@ -1,27 +1,23 @@
 import { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import confetti from 'canvas-confetti';
-import CountUp from 'react-countup';
 
 import { Legend } from './Legend';
 import { Button } from '../atoms/Button';
 import {
     checkRowsAndColsForFibonacciSequences,
-    getTotalSequences,
     isPartOfSequence,
     type SequenceFoundResultObj
 } from '../../utils/sequences';
+import { Toolbar } from './Toolbar';
 
 const GRID_SIZE = 50;
 const SEQUENCE_LENGTH = 5;
 const INITIALMATRIX = Array(GRID_SIZE).fill(Array(GRID_SIZE).fill(0));
-const MESSAGES = ['You got it, keep going!', 'Nice! Good job.', 'Great!', 'Awesome!', 'Amazing!'];
 
 export function Game() {
     const [matrix, setMatrix] = useState(INITIALMATRIX);
     const [results, setResults] = useState<SequenceFoundResultObj | undefined>();
-    const [message, setMessage] = useState('Click on the grid to start upping values.');
     const [disabled, setDisabled] = useState(false);
 
     const handleClick = (x: number, y: number) => {
@@ -102,7 +98,6 @@ export function Game() {
             timer = setTimeout(() => {
                 setMatrix(newMatrix);
                 setResults(undefined);
-                setMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
                 setDisabled(false);
             }, 5000);
         }
@@ -110,8 +105,6 @@ export function Game() {
             clearTimeout(timer);
         };
     }, [matrix]);
-
-    const foundSequences = getTotalSequences(results);
 
     const gridStyle = css`
         display: flex;
@@ -121,40 +114,7 @@ export function Game() {
 
     return (
         <div>
-            <div
-                css={css`
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin: 20px 0;
-                `}
-            >
-                <div
-                    css={css`
-                        margin-right: 20px;
-                    `}
-                >
-                    {results?.col.length || results?.row.length ? (
-                        <>
-                            Nice! Found {foundSequences} sequences. Resetting in...{' '}
-                            <CountUp start={5} end={0} duration={5} useEasing={false} />
-                        </>
-                    ) : (
-                        <>{message}</>
-                    )}
-                </div>
-
-                <Button
-                    value={
-                        <>
-                            Reset
-                            <RestartAltIcon />
-                        </>
-                    }
-                    big
-                    onClick={handleResetState}
-                />
-            </div>
+            <Toolbar results={results} onReset={handleResetState} />
 
             <Legend size={GRID_SIZE} />
 

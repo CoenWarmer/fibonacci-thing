@@ -112,6 +112,14 @@ export function checkRowsAndColsForFibonacciSequences(matrix: number[][], sequen
     const rows = matrix.length;
 
     // check if the column length is the same size as the row length
+    // Check if the column length is the same size as the row length
+    for (let i = 0; i < rows; i++) {
+        if (matrix[i].length !== rows) {
+            throw new Error(
+                'The column length of the matrix must be the same size as the row length.'
+            );
+        }
+    }
 
     for (let i = 0; i < rows; i++) {
         // Check rows for the sequence
