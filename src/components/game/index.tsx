@@ -65,7 +65,7 @@ export function Game() {
             // Start building a cleaned matrix
             const newMatrix = matrix.map((r) => [...r]);
 
-            // Taking the results object, fill the matrix with 0s
+            // Taking the results object, fill the matrix with zeroes
             for (let rowIndex = 0; rowIndex < result.row.length; rowIndex++) {
                 const row = result.row[rowIndex];
 
