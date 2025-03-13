@@ -20,3 +20,9 @@ A game with a 50x50 grid of buttons that allows a user to click on a cell and in
 - Install the Netlify CLI with `npm install -g netlify-cli`
 - Install the project dependencies: `npm install`
 - Run `netlify dev` to start the project locally
+
+## 🧪 How to test
+- Run `npm test`
+
+## How to contribute
+You don't. You're welcome to reach out though.
