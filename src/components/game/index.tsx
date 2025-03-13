@@ -4,22 +4,14 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import confetti from 'canvas-confetti';
 import CountUp from 'react-countup';
 
+import { Legend } from './Legend';
 import { Button } from '../atoms/Button';
-import { findSequenceIndicesInArray } from '../../utils/findSequenceIndicesInArray';
-import { LegendLabel } from '../atoms/LegendLabel';
-
-type SequenceFoundResultObj = {
-    row: SequenceFoundResult[];
-    col: SequenceFoundResult[];
-};
-
-type SequenceFoundResult = {
-    index: number;
-    sequences: {
-        start: number;
-        end: number;
-    }[];
-};
+import {
+    checkRowsAndColsForFibonacciSequences,
+    getTotalSequences,
+    isPartOfSequence,
+    type SequenceFoundResultObj
+} from '../../utils/sequences';
 
 const GRID_SIZE = 50;
 const SEQUENCE_LENGTH = 5;
@@ -59,49 +51,11 @@ export function Game() {
     useEffect(() => {
         let timer: NodeJS.Timeout;
 
-        const checkRowsAndColsForFibonacciSequences = (matrix: number[][]) => {
-            const found: SequenceFoundResultObj = {
-                row: [],
-                col: []
-            };
-
-            const rows = matrix.length;
-
-            for (let i = 0; i < rows; i++) {
-                // Check rows for the sequence
-                const rowSequenceIndices = findSequenceIndicesInArray(matrix[i], SEQUENCE_LENGTH);
-
-                if (rowSequenceIndices.length) {
-                    found.row = found.row.concat({
-                        index: i,
-                        sequences: rowSequenceIndices
-                    });
-                }
-
-                // Check columns for the sequence
-                const column = [];
-
-                for (let j = 0; j < matrix.length; j++) {
-                    column.push(matrix[j][i]);
-                }
-
-                const columnSequenceIndices = findSequenceIndicesInArray(column, SEQUENCE_LENGTH);
-
-                if (columnSequenceIndices.length) {
-                    found.col = found.col.concat({
-                        index: i,
-                        sequences: columnSequenceIndices
-                    });
-                }
-            }
-
-            return found;
-        };
-
-        const result = checkRowsAndColsForFibonacciSequences(matrix);
+        const result = checkRowsAndColsForFibonacciSequences(matrix, SEQUENCE_LENGTH);
 
         setResults(result);
 
+        // We got some hits y'all
         if (result.col.length || result.row.length) {
             setDisabled(true);
 
@@ -196,18 +150,10 @@ export function Game() {
                 />
             </div>
 
-            <div style={{ display: 'flex' }}>
-                {matrix.map((_, y) => (
-                    <LegendLabel label={y} key={y} />
-                ))}
-            </div>
+            <Legend size={GRID_SIZE} />
 
             {matrix.map((col, y) => (
                 <div key={y}>
-                    <div style={{ position: 'absolute', marginLeft: -22, marginTop: 4 }}>
-                        <LegendLabel label={y} />
-                    </div>
-
                     {col.map((cell: number, x: number) => (
                         <Button
                             key={x}
@@ -221,46 +167,4 @@ export function Game() {
             ))}
         </div>
     );
-}
-
-/* Utils */
-
-function isPartOfSequence(
-    x: number,
-    y: number,
-    results: SequenceFoundResultObj | undefined = undefined
-) {
-    if (!results) {
-        return false;
-    }
-
-    return isCoordinateInSequence(results.row, x, y) || isCoordinateInSequence(results.col, y, x);
-}
-
-function isCoordinateInSequence(foundSequences: SequenceFoundResult[], x: number, y: number) {
-    for (const rowResult of foundSequences) {
-        if (rowResult.index === y) {
-            for (const sequence of rowResult.sequences) {
-                if (x >= sequence.start && x <= sequence.end) {
-                    return true;
-                }
-            }
-        }
-    }
-}
-
-function getTotalSequences(results: SequenceFoundResultObj | undefined) {
-    if (!results) {
-        return 0;
-    }
-
-    const rowSequences = results?.row.reduce((acc, row) => {
-        return acc + row.sequences.length;
-    }, 0);
-
-    const colSequences = results?.col.reduce((acc, col) => {
-        return acc + col.sequences.length;
-    }, 0);
-
-    return rowSequences + colSequences;
 }

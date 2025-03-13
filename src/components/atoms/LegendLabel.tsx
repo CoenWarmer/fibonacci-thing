@@ -1,16 +1,18 @@
+import { css } from '@emotion/react';
+
 export function LegendLabel({ label }: { label: string | number }) {
     return (
         <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '22px',
-                height: '22px',
-                minWidth: 'auto',
-                fontSize: '8px',
-                margin: '0 1px 1px 0'
-            }}
+            css={css`
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 22px;
+                height: 22px;
+                min-width: auto;
+                font-size: 8px;
+                margin: 0 1px 1px 0;
+            `}
         >
             {label}
         </div>
