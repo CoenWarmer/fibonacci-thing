@@ -9,7 +9,7 @@ export function Legend({ size }: { size: number }) {
         width: 22px;
         height: 22px;
         margin-left: -22px;
-        margin-top: ${y * 26 + 4}px;
+        margin-top: ${y * 23}px;
         margin-bottom: 4px;
     `;
 

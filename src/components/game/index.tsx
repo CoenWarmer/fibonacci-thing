@@ -113,6 +113,12 @@ export function Game() {
 
     const foundSequences = getTotalSequences(results);
 
+    const gridStyle = css`
+        display: flex;
+        grid-gap: 1px;
+        margin: 0 1px 1px 0;
+    `;
+
     return (
         <div>
             <div
@@ -153,7 +159,7 @@ export function Game() {
             <Legend size={GRID_SIZE} />
 
             {matrix.map((col, y) => (
-                <div key={y}>
+                <div key={y} css={gridStyle}>
                     {col.map((cell: number, x: number) => (
                         <Button
                             key={x}

@@ -16,7 +16,6 @@ export const Button = memo(
         onClick: () => void;
     }) => {
         const buttonStyle = (big: boolean, active: boolean, disabled: boolean) => css`
-            margin: 0 1px 0 0;
             padding: 0;
             width: ${big ? '40px' : '22px'};
             height: ${big ? '40px' : '22px'};

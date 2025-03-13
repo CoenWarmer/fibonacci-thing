@@ -111,6 +111,8 @@ export function checkRowsAndColsForFibonacciSequences(matrix: number[][], sequen
 
     const rows = matrix.length;
 
+    // check if the column length is the same size as the row length
+
     for (let i = 0; i < rows; i++) {
         // Check rows for the sequence
         const rowSequenceIndices = findSequenceIndicesInArray(matrix[i], sequenceLength);
