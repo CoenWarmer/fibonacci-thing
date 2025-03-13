@@ -9,6 +9,21 @@ import {
 
 describe('Sequence utils', () => {
     describe('checkRowsAndColsForFibonacciSequences', () => {
+        it('should throw an error if the passed matrix is not a square', () => {
+            const matrix = [
+                [0, 1, 1, 2, 3],
+                [1, 1, 2, 3, 5],
+                [1, 2, 3, 5, 8],
+                [2, 3, 5, 8, 13],
+                [5, 8, 13, 21, 34],
+                [5, 8, 13, 21, 34]
+            ];
+
+            expect(() => checkRowsAndColsForFibonacciSequences(matrix, 5)).toThrow(
+                'The column length of the matrix must be the same size as the row length.'
+            );
+        });
+
         it('should return an object with all the found fibonacci sequences', () => {
             const matrix = [
                 [0, 1, 1, 2, 3],
