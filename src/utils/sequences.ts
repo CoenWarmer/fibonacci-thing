@@ -22,7 +22,7 @@ export function findSequenceIndicesInArray(
         const slice = arr.slice(i, i + sequenceLength);
 
         // Once we move through the array, the slice might be less than the sequence length, so we need to check for that
-        if (slice.length === 5) {
+        if (slice.length === sequenceLength) {
             const sequenceIsPresent = findFibonacciSequence(slice);
 
             if (sequenceIsPresent) {
@@ -36,6 +36,10 @@ export function findSequenceIndicesInArray(
 }
 
 export function findFibonacciSequence(arr: number[]) {
+    if (arr.length < 3) {
+        return false;
+    }
+
     const sequence = [];
 
     for (let i = 0; i < arr.length - 2; i++) {
