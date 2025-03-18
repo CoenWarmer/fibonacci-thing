@@ -35,30 +35,55 @@ export function findSequenceIndicesInArray(
     return indices;
 }
 
-export function findFibonacciSequence(arr: number[]) {
-    if (arr.length < 3) {
-        return false;
-    }
+export function findFibonacciSequence(arr: number[]): boolean {
+    if (arr.length < 3) return false; // A Fibonacci sequence must have at least 3 numbers
 
-    const sequence = [];
+    const maxNum = Math.max(...arr);
+    const fibonacciArray = generateFibonacci(maxNum);
 
+    // Check for contiguous Fibonacci sequence
     for (let i = 0; i < arr.length - 2; i++) {
-        // Do a lookup in the array to figure out if the sequence is a fibonacci sequence
-        // Also handle a case where the sequence is 0, 0, 0
-        if (arr[i] + arr[i + 1] === arr[i + 2] && arr[i + 1] !== 0 && arr[i + 2] !== 0) {
-            sequence.push(arr[i]);
+        if (fibonacciArray.includes(arr[i]) && fibonacciArray.includes(arr[i + 1])) {
+            let a = arr[i],
+                b = arr[i + 1];
+            let j = i + 2;
 
-            if (sequence.length === 3) {
-                sequence.push(arr[i + 1]);
-                sequence.push(arr[i + 2]);
-                return true;
+            while (
+                j < arr.length &&
+                fibonacciArray.includes(arr[j]) &&
+                arr[j] === a + b &&
+                arr[i + 1] !== 0 &&
+                arr[i + 2] !== 0
+            ) {
+                a = b;
+                b = arr[j];
+                j++;
             }
-        } else {
-            sequence.length = 0;
+
+            if (j - i === arr.length) {
+                return true; // Found a valid Fibonacci sequence
+            }
         }
     }
 
     return false;
+}
+
+function generateFibonacci(limit: number): number[] {
+    const fibArray: number[] = [];
+    let a = 0,
+        b = 1;
+
+    fibArray.push(a);
+    fibArray.push(b);
+
+    for (let next = a + b; next <= limit; next = a + b) {
+        fibArray.push(next);
+        a = b;
+        b = next;
+    }
+
+    return fibArray;
 }
 
 export function isPartOfSequence(

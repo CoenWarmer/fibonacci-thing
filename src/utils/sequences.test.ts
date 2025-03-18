@@ -250,6 +250,16 @@ describe('Sequence utils', () => {
             expect(findFibonacciSequence(value)).toBe(false);
         });
 
+        const fibonacciLikeValues = [
+            [[10, 10, 20, 30, 50]],
+            [[3, 4, 7, 11, 18, 29]],
+            [[0, 2, 2, 4, 6, 10, 16]]
+        ];
+
+        test.each(fibonacciLikeValues)('should return false for %j', (value) => {
+            expect(findFibonacciSequence(value)).toBe(false);
+        });
+
         const incorrectLengthValues = [
             [[1, 13]],
             [[12, 3, 5, 4]],
