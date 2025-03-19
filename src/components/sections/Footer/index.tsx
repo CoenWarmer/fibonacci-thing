@@ -34,7 +34,7 @@ export const Footer: React.FC<Props> = (props) => {
                 </MuiBox>
             )}
             {copyrightText && (
-                <MuiTypography component="div" color="text.secondary" sx={{ color: '#999' }}>
+                <MuiTypography component="div" color="primary" sx={{ color: '#999' }}>
                     <Markdown text={copyrightText} data-sb-field-path=".copyrightText" />
                 </MuiTypography>
             )}
