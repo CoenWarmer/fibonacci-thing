@@ -1,3 +1,4 @@
+import { Matrix } from '../components/game/Matrix';
 import {
     checkRowsAndColsForFibonacciSequences,
     findSequenceIndicesInArray,
@@ -7,31 +8,32 @@ import {
     isCoordinateInSequence
 } from './sequences';
 
+function turnArrayMatrixIntoMatrixClass(matrix: number[][]): Matrix {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+
+    const matrixClass = new Matrix(rows, cols);
+
+    // Populate the matrix
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            matrixClass.set(i, j, matrix[i][j]);
+        }
+    }
+
+    return matrixClass;
+}
+
 describe('Sequence utils', () => {
     describe('checkRowsAndColsForFibonacciSequences', () => {
-        it('should throw an error if the passed matrix is not a square', () => {
-            const matrix = [
-                [0, 1, 1, 2, 3],
-                [1, 1, 2, 3, 5],
-                [1, 2, 3, 5, 8],
-                [2, 3, 5, 8, 13],
-                [5, 8, 13, 21, 34],
-                [5, 8, 13, 21, 34]
-            ];
-
-            expect(() => checkRowsAndColsForFibonacciSequences(matrix, 5)).toThrow(
-                'The column length of the matrix must be the same size as the row length.'
-            );
-        });
-
         it('should return an object with all the found fibonacci sequences', () => {
-            const matrix = [
+            const matrix = turnArrayMatrixIntoMatrixClass([
                 [0, 1, 1, 2, 3],
                 [1, 1, 2, 3, 5],
                 [1, 2, 3, 5, 8],
                 [2, 3, 5, 8, 13],
                 [5, 8, 13, 21, 34]
-            ];
+            ]);
 
             const result = checkRowsAndColsForFibonacciSequences(matrix, 5);
 
@@ -48,7 +50,7 @@ describe('Sequence utils', () => {
         });
 
         it('should return an object with all the found fibonacci sequences in the rows', () => {
-            const matrix = [
+            const matrix = turnArrayMatrixIntoMatrixClass([
                 [0, 0, 4, 1, 1, 2, 3, 13],
                 [0, 3, 5, 1, 1, 2, 3, 5],
                 [5, 3, 1, 1, 2, 3, 5, 8],
@@ -57,7 +59,7 @@ describe('Sequence utils', () => {
                 [1, 6, 5, 8, 13, 21, 34, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0],
                 [6, 3, 6, 2, 3, 5, 8, 13]
-            ];
+            ]);
 
             const result = checkRowsAndColsForFibonacciSequences(matrix, 5);
 
@@ -93,7 +95,7 @@ describe('Sequence utils', () => {
         });
 
         it('should return an object with all the found fibonacci sequences in the rows also when there are multiple sequences', () => {
-            const matrix = [
+            const matrix = turnArrayMatrixIntoMatrixClass([
                 [0, 1, 1, 2, 3, 5, 3, 3, 5, 8, 13, 21],
                 [0, 1, 1, 3, 3, 5, 3, 5, 8, 13, 21, 5],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -106,7 +108,7 @@ describe('Sequence utils', () => {
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            ];
+            ]);
 
             const result = checkRowsAndColsForFibonacciSequences(matrix, 5);
 
@@ -129,7 +131,7 @@ describe('Sequence utils', () => {
         });
 
         it('should return an object with all the found fibonacci sequences in the rows and columns', () => {
-            const matrix = [
+            const matrix = turnArrayMatrixIntoMatrixClass([
                 [0, 1, 1, 2, 3, 5, 3, 3, 5, 8, 13, 21],
                 [1, 1, 1, 3, 3, 8, 3, 5, 8, 13, 21, 5],
                 [1, 1, 1, 3, 3, 13, 3, 5, 8, 13, 21, 5],
@@ -142,7 +144,7 @@ describe('Sequence utils', () => {
                 [0, 1, 1, 3, 3, 5, 3, 5, 55, 13, 21, 5],
                 [0, 1, 1, 3, 3, 5, 3, 5, 55, 13, 21, 5],
                 [0, 1, 1, 3, 3, 5, 3, 5, 55, 13, 21, 5]
-            ];
+            ]);
 
             const result = checkRowsAndColsForFibonacciSequences(matrix, 5);
 

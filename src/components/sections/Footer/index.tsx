@@ -3,8 +3,8 @@ import type * as types from 'types';
 import { Link } from '../../atoms/Link';
 import { Markdown } from '../../atoms/Markdown';
 
-import MuiBox from '@mui/material/Box';
-import MuiTypography from '@mui/material/Typography';
+import MuiBox from '@mui/joy/Box';
+import MuiTypography from '@mui/joy/Typography';
 
 type Props = types.Footer & types.StackbitObjectId;
 

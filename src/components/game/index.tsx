@@ -10,42 +10,61 @@ import {
     type SequenceFoundResultObj
 } from '../../utils/sequences';
 import { Toolbar } from './Toolbar';
+import { estimateMatrixMemoryUsage, Matrix } from './Matrix';
 
-const GRID_SIZE = 50;
+const GRID_SIZE = 1000;
 const SEQUENCE_LENGTH = 5;
-const INITIALMATRIX = Array(GRID_SIZE).fill(Array(GRID_SIZE).fill(0));
+const RESET_TIME_IN_SECONDS = 5;
 
 export function Game() {
-    const [matrix, setMatrix] = useState(INITIALMATRIX);
+    const [count, setCount] = useState(0);
+    const [error, setError] = useState('');
+    const [matrix, setMatrix] = useState<Matrix | undefined>();
+
+    // First we check the memory usage of the matrix
+    useEffect(() => {
+        const memory = (performance as any).memory;
+        if (memory) {
+            if (estimateMatrixMemoryUsage(GRID_SIZE, GRID_SIZE) > memory.usedJSHeapSize) {
+                setError('Matrix will not fit in memory.');
+            } else {
+                setMatrix(new Matrix(GRID_SIZE, GRID_SIZE));
+            }
+        } else {
+            console.log('performance.memory is not available in this browser.');
+            setError(
+                'We need a browser that supports performance.memory to determine whether or not the matrix object will fit in memory.'
+            );
+        }
+
+        estimateMatrixMemoryUsage(GRID_SIZE, GRID_SIZE);
+    }, []);
+
     const [results, setResults] = useState<SequenceFoundResultObj | undefined>();
     const [disabled, setDisabled] = useState(false);
 
     const handleClick = (x: number, y: number) => {
-        const rows = matrix.length;
-        const cols = matrix[0].length;
-
-        const newMatrix = matrix.map((r) => [...r]);
-
-        // Increment row values by 1
-        for (let i = 0; i < rows; i++) {
-            newMatrix[i][x] = matrix[i][x] + 1;
+        if (matrix === undefined) {
+            return;
         }
 
-        // Increment column values by 1
-        for (let j = 0; j < cols; j++) {
-            newMatrix[y][j] = matrix[y][j] + 1;
-        }
+        matrix.increment(x, y);
 
-        setMatrix(newMatrix);
+        setCount(count + 1);
     };
 
     const handleResetState = () => {
-        setMatrix(INITIALMATRIX);
+        const newMatrix = new Matrix(GRID_SIZE, GRID_SIZE);
+        setMatrix(newMatrix);
         setResults(undefined);
     };
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
+
+        if (matrix === undefined) {
+            return;
+        }
 
         const result = checkRowsAndColsForFibonacciSequences(matrix, SEQUENCE_LENGTH);
 
@@ -61,76 +80,62 @@ export function Game() {
                 origin: { x: 0.5, y: 0.5 }
             });
 
-            // Now that we have results, we need to clear them after 5 seconds.
-            // Start building a cleaned matrix
-            const newMatrix = matrix.map((r) => [...r]);
-
-            // Taking the results object, fill the matrix with zeroes
-            for (let rowIndex = 0; rowIndex < result.row.length; rowIndex++) {
-                const row = result.row[rowIndex];
-
-                for (let sequenceIndex = 0; sequenceIndex < row.sequences.length; sequenceIndex++) {
-                    const sequence = row.sequences[sequenceIndex];
-
-                    for (let i = sequence.start; i <= sequence.end; i++) {
-                        newMatrix[row.index][i] = 0;
-                    }
-                }
-            }
-
-            for (let colIndex = 0; colIndex < result.col.length; colIndex++) {
-                const column = result.col[colIndex];
-
-                for (
-                    let sequenceIndex = 0;
-                    sequenceIndex < column.sequences.length;
-                    sequenceIndex++
-                ) {
-                    const sequence = column.sequences[sequenceIndex];
-
-                    for (let i = sequence.start; i <= sequence.end; i++) {
-                        newMatrix[i][column.index] = 0;
-                    }
-                }
-            }
-
             // Clear results on a timeout
             timer = setTimeout(() => {
-                setMatrix(newMatrix);
+                matrix.clearSequencesFromResultObject(result);
                 setResults(undefined);
                 setDisabled(false);
-            }, 5000);
+            }, RESET_TIME_IN_SECONDS * 1000);
         }
         return () => {
             clearTimeout(timer);
         };
-    }, [matrix]);
-
-    const gridStyle = css`
-        display: flex;
-        grid-gap: 1px;
-        margin: 0 1px 1px 0;
-    `;
+    }, [matrix, count]);
 
     return (
         <div>
-            <Toolbar results={results} onReset={handleResetState} />
+            <Toolbar
+                results={results}
+                resetTime={RESET_TIME_IN_SECONDS}
+                performance={performance}
+                onReset={handleResetState}
+            />
 
-            <Legend size={GRID_SIZE} />
+            {/* <Legend size={GRID_SIZE} /> */}
 
-            {matrix.map((col, y) => (
-                <div key={y} css={gridStyle}>
-                    {col.map((cell: number, x: number) => (
+            {error ? (
+                <div>{error}</div>
+            ) : matrix ? (
+                <Grid
+                    autoContainerWidth
+                    autoWidth
+                    containerStyle={{ overflow: 'scroll' }}
+                    cellRenderer={({ columnIndex, rowIndex }) => (
                         <Button
-                            key={x}
-                            value={cell}
+                            key={`${rowIndex}-${columnIndex}`}
+                            value={
+                                <>
+                                    {/* r: {rowIndex}, c: {columnIndex} -  */}
+
+                                    {matrix?.get(rowIndex, columnIndex)}
+                                </>
+                            }
+                            row={rowIndex}
+                            col={columnIndex}
                             disabled={disabled}
-                            active={isPartOfSequence(x, y, results)}
-                            onClick={() => handleClick(x, y)}
+                            active={isPartOfSequence(columnIndex, rowIndex, results)}
+                            onClick={() => handleClick(columnIndex, rowIndex)}
                         />
-                    ))}
-                </div>
-            ))}
+                    )}
+                    columnWidth={22}
+                    rowHeight={22}
+                    columnCount={50}
+                    rowCount={50}
+                    width={1150}
+                    height={1150}
+                    autoHeight
+                />
+            ) : null}
         </div>
     );
 }

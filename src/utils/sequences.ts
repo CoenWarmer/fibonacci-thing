@@ -1,3 +1,5 @@
+import { Matrix } from '../components/game/Matrix';
+
 export type SequenceFoundResultObj = {
     row: SequenceFoundResult[];
     col: SequenceFoundResult[];
@@ -132,27 +134,15 @@ export function getTotalSequences(results: SequenceFoundResultObj | undefined) {
     return rowSequences + colSequences;
 }
 
-export function checkRowsAndColsForFibonacciSequences(matrix: number[][], sequenceLength: number) {
+export function checkRowsAndColsForFibonacciSequences(matrix: Matrix, sequenceLength: number) {
     const found: SequenceFoundResultObj = {
         row: [],
         col: []
     };
 
-    const rows = matrix.length;
-
-    // check if the column length is the same size as the row length
-    // Check if the column length is the same size as the row length
-    for (let i = 0; i < rows; i++) {
-        if (matrix[i].length !== rows) {
-            throw new Error(
-                'The column length of the matrix must be the same size as the row length.'
-            );
-        }
-    }
-
-    for (let i = 0; i < rows; i++) {
+    for (let i = 0; i < matrix.rows; i++) {
         // Check rows for the sequence
-        const rowSequenceIndices = findSequenceIndicesInArray(matrix[i], sequenceLength);
+        const rowSequenceIndices = findSequenceIndicesInArray(matrix.getRow(i), sequenceLength);
 
         if (rowSequenceIndices.length) {
             found.row = found.row.concat({
@@ -161,14 +151,10 @@ export function checkRowsAndColsForFibonacciSequences(matrix: number[][], sequen
             });
         }
 
-        // Check columns for the sequence
-        const column = [];
-
-        for (let j = 0; j < matrix.length; j++) {
-            column.push(matrix[j][i]);
-        }
-
-        const columnSequenceIndices = findSequenceIndicesInArray(column, sequenceLength);
+        const columnSequenceIndices = findSequenceIndicesInArray(
+            matrix.getColumn(i),
+            sequenceLength
+        );
 
         if (columnSequenceIndices.length) {
             found.col = found.col.concat({
