@@ -14,7 +14,7 @@ export type Props = { page: types.Page; siteConfig: types.Config };
 const Page: React.FC<Props> = ({ page, siteConfig }) => {
     return (
         <MuiBox sx={{ px: 3 }} data-sb-object-id={page.__id}>
-            <MuiContainer maxWidth="lg" sx={{ width: 1150 }} disableGutters={true}>
+            <MuiContainer maxWidth="lg" disableGutters={true}>
                 <Head>
                     <title>{page.title}</title>
                     <meta name="viewport" content="width=device-width, initial-scale=1" />

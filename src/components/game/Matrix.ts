@@ -18,7 +18,7 @@ export class Matrix {
 
     // Set value at (row, col)
     set(row: number, col: number, value: number): void {
-        this.data[row * this.cols + col] = value;
+        this.data[col * this.cols + row] = value;
     }
 
     getRow(row: number): number[] {
@@ -30,15 +30,19 @@ export class Matrix {
     }
 
     increment(row: number, col: number): void {
+        console.log('row', row);
+        console.log('col', col);
+
         this.incrementRow(row);
         this.incrementColumn(col);
 
         const currentValue = this.get(row, col);
-        this.set(row, col, currentValue - 1);
+        console.log('currentValue', currentValue);
+        this.set(row, col, currentValue > 1 ? currentValue - 1 : 0);
     }
 
     incrementRow(row: number): void {
-        let start = row * this.cols;
+        let start = row * this.rows;
         for (let j = 0; j < this.cols; j++) {
             this.data[start + j] += 1;
         }

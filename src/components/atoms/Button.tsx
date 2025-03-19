@@ -1,5 +1,5 @@
-import { memo } from 'react';
-import { css } from '@emotion/react';
+import { CSSProperties, memo } from 'react';
+import { css, CSSObject } from '@emotion/react';
 import MuiTypography from '@mui/joy/Typography';
 
 export const Button = memo(
@@ -10,6 +10,7 @@ export const Button = memo(
         active = false,
         big = false,
         disabled = false,
+        style,
         onClick
     }: {
         value: number | string | React.ReactNode;
@@ -18,6 +19,7 @@ export const Button = memo(
         big?: boolean;
         active?: boolean;
         disabled?: boolean;
+        style?: CSSProperties;
         onClick: () => void;
     }) => {
         const buttonStyle = (big: boolean, active: boolean, disabled: boolean) => css`
@@ -47,7 +49,7 @@ export const Button = memo(
         return (
             <button
                 disabled={disabled}
-                css={buttonStyle(big, active, disabled)}
+                css={[buttonStyle(big, active, disabled), style as CSSObject]}
                 onClick={onClick}
                 title={`row: ${row}; col: ${col}`}
             >
