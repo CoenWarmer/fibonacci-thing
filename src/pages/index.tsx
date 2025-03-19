@@ -1,4 +1,3 @@
-import React from 'react';
 import Head from 'next/head';
 import { GetStaticProps } from 'next';
 import type * as types from 'types';
@@ -7,8 +6,8 @@ import { Footer } from '../components/sections/Footer';
 import { Game } from '../components/game';
 import { siteConfig, urlToContent } from '../utils/content';
 
-import MuiBox from '@mui/material/Box';
-import MuiContainer from '@mui/material/Container';
+import MuiBox from '@mui/joy/Box';
+import MuiContainer from '@mui/joy/Container';
 
 export type Props = { page: types.Page; siteConfig: types.Config };
 
