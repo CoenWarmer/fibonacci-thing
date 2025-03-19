@@ -1,15 +1,20 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { css } from '@emotion/react';
+import MuiTypography from '@mui/joy/Typography';
 
 export const Button = memo(
     ({
         value,
+        col,
+        row,
         active = false,
         big = false,
         disabled = false,
         onClick
     }: {
         value: number | string | React.ReactNode;
+        col?: number;
+        row?: number;
         big?: boolean;
         active?: boolean;
         disabled?: boolean;
@@ -20,12 +25,10 @@ export const Button = memo(
             width: ${big ? '40px' : '22px'};
             height: ${big ? '40px' : '22px'};
             min-width: auto;
-            font-size: 8px;
             border: none;
             border-radius: 2px;
-            border-color: #7394ec;
+            border: 1px solid #fff;
             background-color: ${active ? 'green' : disabled ? 'rgb(51, 76, 139)' : '#4b69b7'};
-            color: ${disabled && !active ? '#999' : '#fff'};
             box-shadow: none;
             cursor: pointer;
             transition: background-color 0.05s ease-in-out;
@@ -42,8 +45,17 @@ export const Button = memo(
         `;
 
         return (
-            <button disabled={disabled} css={buttonStyle(big, active, disabled)} onClick={onClick}>
-                {value}
+            <button
+                disabled={disabled}
+                css={buttonStyle(big, active, disabled)}
+                onClick={onClick}
+                title={`row: ${row}; col: ${col}`}
+            >
+                <MuiTypography
+                    sx={{ fontSize: '10px', color: disabled && !active ? '#999' : '#fff' }}
+                >
+                    {value}
+                </MuiTypography>
             </button>
         );
     }

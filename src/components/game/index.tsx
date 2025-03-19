@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import confetti from 'canvas-confetti';
+import { Grid } from 'react-virtualized';
+import 'react-virtualized/styles.css';
 
 import { Legend } from './Legend';
 import { Button } from '../atoms/Button';
