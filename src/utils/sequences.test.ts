@@ -12,7 +12,7 @@ function turnArrayMatrixIntoMatrixClass(matrix: number[][]): Matrix {
     const rows = matrix.length;
     const cols = matrix[0].length;
 
-    const matrixClass = new Matrix(rows, cols);
+    const matrixClass = new Matrix(rows, cols, { prefillArray: true });
 
     // Populate the matrix
     for (let i = 0; i < rows; i++) {

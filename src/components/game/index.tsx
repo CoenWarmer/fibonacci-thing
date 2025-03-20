@@ -170,9 +170,11 @@ export function Game() {
         matrixWorker.current = worker;
 
         matrixWorker.current.addEventListener('message', (event) => {
+            const { gridSize, arrayData } = event.data;
+
             // Reconstruct the Matrix instance from the serialized data
             const newlyCreatedMatrix = new Matrix(gridSize, gridSize, { prefillArray: false });
-            newlyCreatedMatrix.data = event.data; // Restore the Float32Array data
+            newlyCreatedMatrix.data = arrayData; // Restore the Float32Array data
 
             matrix.current = newlyCreatedMatrix;
 

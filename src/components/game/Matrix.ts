@@ -51,7 +51,6 @@ export class Matrix {
     }
 
     clearSequencesFromResultObject(result: SequenceFoundResultObj): void {
-        console.log('result', result);
         for (const row of result.row) {
             for (const sequence of row.sequences) {
                 this.clearSequenceFromRow(row.index, sequence.start, sequence.end);

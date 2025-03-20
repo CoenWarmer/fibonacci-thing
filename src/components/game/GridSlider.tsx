@@ -34,7 +34,7 @@ export function GridSlider({
                 step={1}
                 min={5}
                 max={5000}
-                value={gridSize}
+                defaultValue={gridSize}
                 onChange={onChange}
                 onChangeCommitted={(_, value) => onChangeGridSize(value as number)}
             />
@@ -42,7 +42,7 @@ export function GridSlider({
                 Current size: {gridSize} * {gridSize} ={' '}
                 {(gridSize * gridSize).toLocaleString('en-US')} cells
                 <br />
-                {perfTime === undefined ? '' : `Last grid calculation took ${perfTime} ms`}
+                {perfTime === undefined ? '' : `Last render took ${perfTime} ms`}
             </Typography>
         </Box>
     );
