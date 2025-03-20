@@ -11,7 +11,7 @@ export const Header: React.FC<Props> = (props) => {
     const { title, navLinks = [], 'data-sb-object-id': objectId } = props;
 
     return (
-        <div>
+        <>
             {title && (
                 <MuiBox sx={{ mb: 1, mr: 2, flexGrow: 1 }}>
                     <MuiTypography
@@ -44,6 +44,6 @@ export const Header: React.FC<Props> = (props) => {
                     ))}
                 </MuiBox>
             )}
-        </div>
+        </>
     );
 };

@@ -103,7 +103,13 @@ export function Toolbar({
                     onChangeGridSize={handleChangeGridSize}
                 />
                 <Memory performance={performance} />
-                <IconButton disabled={disabled} variant="solid" color="primary" onClick={onReset}>
+                <IconButton
+                    disabled={disabled}
+                    color="primary"
+                    variant="solid"
+                    sx={{ padding: '8px 10px', gap: '4px' }}
+                    onClick={onReset}
+                >
                     Reset
                     <RestartAltIcon />
                 </IconButton>

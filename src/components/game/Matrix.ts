@@ -30,14 +30,10 @@ export class Matrix {
     }
 
     increment(row: number, col: number): void {
-        console.log('row', row);
-        console.log('col', col);
-
         this.incrementRow(row);
         this.incrementColumn(col);
 
         const currentValue = this.get(row, col);
-        console.log('currentValue', currentValue);
         this.set(row, col, currentValue > 1 ? currentValue - 1 : 0);
     }
 

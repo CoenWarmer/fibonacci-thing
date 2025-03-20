@@ -7,16 +7,14 @@ import MuiLink from '@mui/joy/Link';
 export type Props = types.Link &
     types.StackbitFieldPath & { className?: string; sx?: { [key: string]: any } };
 
-export const Link: React.FC<Props> = (props) => {
-    const {
-        className,
-        label,
-        url,
-        underline = 'always',
-        color = 'primary',
-        sx,
-        'data-sb-field-path': fieldPath
-    } = props;
+export const Link: React.FC<Props> = ({
+    className,
+    label,
+    url,
+    underline = 'always',
+    sx,
+    'data-sb-field-path': fieldPath
+}) => {
     const annotations = fieldPath ? [fieldPath, `${fieldPath}.url#@href`].join(' ').trim() : null;
 
     return (

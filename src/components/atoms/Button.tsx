@@ -29,7 +29,7 @@ export const Button = memo(
             min-width: auto;
             border: none;
             border-radius: 2px;
-            border: 1px solid #fff;
+            border: 1px solid rgb(221, 231, 238);
             background-color: ${active ? 'green' : disabled ? 'rgb(51, 76, 139)' : '#0b6bcb'};
             box-shadow: none;
             cursor: pointer;

@@ -46,7 +46,7 @@ export function Game() {
     const [disabled, setDisabled] = useState(false);
 
     const handleClick = (x: number, y: number) => {
-        if (matrix === undefined) {
+        if (matrix.current === undefined) {
             return;
         }
 
@@ -56,7 +56,6 @@ export function Game() {
     };
 
     const handleChangeGridSize = (newGridSize: number) => {
-        setDisabled(true);
         matrix.current = new Matrix(newGridSize, newGridSize);
         setGridSize(newGridSize);
         setResults(undefined);
@@ -104,7 +103,7 @@ export function Game() {
     }, [matrix, count]);
 
     return (
-        <div>
+        <>
             <Toolbar
                 disabled={matrix.current === undefined}
                 results={results}
@@ -158,11 +157,14 @@ export function Game() {
                                     onClick={() => handleClick(rowIndex, columnIndex)}
                                 />
                             )}
-                            containerStyle={{ display: 'flex' }}
+                            containerStyle={{
+                                display: 'flex',
+                                backgroundColor: 'rgb(221, 231, 238)'
+                            }}
                         />
                     )}
                 </AutoSizer>
             ) : null}
-        </div>
+        </>
     );
 }
