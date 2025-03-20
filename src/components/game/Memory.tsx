@@ -1,6 +1,17 @@
+import { useEffect, useState } from 'react';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 import { MemoryOutlined } from '@mui/icons-material';
 import { Box, Typography } from '@mui/joy';
-import { useEffect, useState } from 'react';
+
 import { ToolbarElementHeader } from './ToolbarElementHeader';
 
 type V8Memory = {
@@ -13,18 +24,38 @@ export type BrowserPerformance = {
     memory: V8Memory;
 };
 
-export function Memory({ performance }: { performance: BrowserPerformance }) {
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+export function Memory({
+    gridSize,
+    performance
+}: {
+    gridSize: number;
+    performance: BrowserPerformance;
+}) {
     const [stateMemory, setStateMemory] = useState<V8Memory | undefined>();
 
+    const [memoryUsage, setMemoryUsage] = useState<
+        Array<{ gridSize: number; used: number; heapLimit: number }>
+    >([]);
+
     useEffect(() => {
-        if (
-            performance &&
-            performance.memory &&
-            performance.memory.usedJSHeapSize !== stateMemory?.usedJSHeapSize
-        ) {
+        if (memoryUsage.find((item) => item.gridSize === gridSize)) {
+            return;
+        }
+
+        if (performance && performance.memory && performance.memory.usedJSHeapSize) {
+            setMemoryUsage(
+                memoryUsage.concat({
+                    gridSize,
+                    used: Math.floor(performance.memory.usedJSHeapSize / 1024 / 1024),
+                    heapLimit: Math.floor(performance.memory.jsHeapSizeLimit / 1024 / 1024)
+                })
+            );
+
             setStateMemory(performance.memory);
         }
-    }, [performance?.memory?.usedJSHeapSize]);
+    }, [gridSize, performance?.memory?.usedJSHeapSize]);
 
     const { usedJSHeapSize, totalJSHeapSize, jsHeapSizeLimit } = stateMemory || {
         usedJSHeapSize: 0,
@@ -32,11 +63,25 @@ export function Memory({ performance }: { performance: BrowserPerformance }) {
         jsHeapSizeLimit: 0
     };
 
-    const relativeMemUsage = stateMemory
-        ? Math.floor((usedJSHeapSize / stateMemory.totalJSHeapSize) * 100)
-        : 0;
+    // const relativeMemUsage = stateMemory
+    //     ? Math.floor((usedJSHeapSize / stateMemory.totalJSHeapSize) * 100)
+    //     : 0;
 
-    return stateMemory ? (
+    const data = {
+        labels: memoryUsage.map((item) => `${item.gridSize} cells`),
+        datasets: [
+            {
+                label: 'Memory usage (MB)',
+                data: memoryUsage.map((item) => item.used || 0),
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                barThickness: 12
+            }
+        ]
+    };
+
+    console.log('data', data);
+
+    return (
         <Box
             sx={{
                 display: 'flex',
@@ -48,7 +93,7 @@ export function Memory({ performance }: { performance: BrowserPerformance }) {
         >
             <ToolbarElementHeader icon={MemoryOutlined} title="Memory" />
 
-            <Box
+            {/* <Box
                 sx={{
                     display: 'flex',
                     position: 'relative',
@@ -96,7 +141,31 @@ export function Memory({ performance }: { performance: BrowserPerformance }) {
                         {Math.floor(totalJSHeapSize / (1024 * 1024))} MB
                     </Typography>
                 </Box>
-            </Box>
+            </Box> */}
+
+            <Bar
+                options={{
+                    responsive: true,
+                    animation: false,
+                    plugins: {
+                        filler: {
+                            propagate: true
+                        },
+                        legend: {
+                            display: false,
+                            position: 'bottom' as const
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: (value) => `${value} MB`
+                            }
+                        }
+                    }
+                }}
+                data={data}
+            />
 
             <Typography component="p" fontSize={10} sx={{ mt: '4px' }}>
                 Max heap available on system: {Math.ceil(jsHeapSizeLimit / (1024 * 1024 * 1024))} GB
@@ -105,5 +174,5 @@ export function Memory({ performance }: { performance: BrowserPerformance }) {
                 of the total available heap size
             </Typography>
         </Box>
-    ) : null;
+    );
 }

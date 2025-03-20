@@ -8,7 +8,6 @@ import { GridSlider } from './GridSlider';
 import { Memory } from './Memory';
 import { getTotalSequences, SequenceFoundResultObj } from '../../utils/sequences';
 import { Pattern } from '@mui/icons-material';
-import { ToolbarWorkerSwitch } from './ToolbarWorkerSwitch';
 
 export function Toolbar({
     disabled,
@@ -134,18 +133,14 @@ export function Toolbar({
                     disabled={disabled}
                     gridSize={gridSize}
                     perfTime={perfTime}
-                    onChange={handleChange}
-                    onChangeGridSize={handleChangeGridSize}
-                />
-
-                <Memory performance={performance} />
-
-                <ToolbarWorkerSwitch
                     isWorkerEnabled={isWorkerEnabled}
                     onToggleWorker={onToggleWorker}
+                    onChange={handleChange}
+                    onChangeGridSize={handleChangeGridSize}
                     onReset={onReset}
-                    disabled={disabled}
                 />
+
+                <Memory gridSize={gridSize} performance={performance} />
             </Box>
         </Box>
     );
