@@ -1,4 +1,4 @@
-import { CSSProperties, useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { AutoSizer, Grid } from 'react-virtualized';
 import 'react-virtualized/styles.css';
@@ -12,9 +12,9 @@ import {
 } from '../../utils/sequences';
 import { Toolbar } from './Toolbar';
 import { estimateMatrixMemoryUsage, Matrix } from './Matrix';
-import { Box } from '@mui/joy';
+import { Alert, Box, Typography } from '@mui/joy';
 
-const INITIAL_GRID_SIZE = 1000;
+const INITIAL_GRID_SIZE = 50;
 const SEQUENCE_LENGTH = 5;
 const RESET_TIME_IN_SECONDS = 5;
 
@@ -22,21 +22,22 @@ export function Game() {
     const [gridSize, setGridSize] = useState(INITIAL_GRID_SIZE);
     const [count, setCount] = useState(0);
     const [error, setError] = useState('');
-    const [matrix, setMatrix] = useState<Matrix | undefined>();
+
+    const matrix = useRef<Matrix | undefined>(undefined);
 
     // First we check the memory usage of the matrix
     useEffect(() => {
-        const memory = (performance as any).memory;
+        const memory = (performance as any)?.memory;
         if (memory) {
             if (estimateMatrixMemoryUsage(gridSize, gridSize) > memory.usedJSHeapSize) {
                 setError('Matrix will not fit in memory.');
             } else {
-                setMatrix(new Matrix(gridSize, gridSize));
+                matrix.current = new Matrix(gridSize, gridSize);
             }
         } else {
             console.log('performance.memory is not available in this browser.');
             setError(
-                'We need a browser that supports performance.memory to determine whether or not the matrix object will fit in memory.'
+                'This app needs a browser that supports performance.memory to determine whether or not the matrix object will fit in memory. Please use a V8 based browser.'
             );
         }
     }, [gridSize]);
@@ -49,34 +50,33 @@ export function Game() {
             return;
         }
 
-        matrix.increment(x, y);
+        matrix.current?.increment(x, y);
 
         setCount(count + 1);
     };
 
     const handleChangeGridSize = (newGridSize: number) => {
-        console.log('newGridSize', newGridSize);
-        const newMatrix = new Matrix(newGridSize, newGridSize);
-        setMatrix(newMatrix);
+        setDisabled(true);
+        matrix.current = new Matrix(newGridSize, newGridSize);
         setGridSize(newGridSize);
         setResults(undefined);
         setCount(count + 1);
     };
 
     const handleResetState = () => {
-        const newMatrix = new Matrix(gridSize, gridSize);
-        setMatrix(newMatrix);
+        matrix.current = new Matrix(gridSize, gridSize);
+        setCount(count + 1);
         setResults(undefined);
     };
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
 
-        if (matrix === undefined) {
+        if (matrix.current === undefined) {
             return;
         }
 
-        const result = checkRowsAndColsForFibonacciSequences(matrix, SEQUENCE_LENGTH);
+        const result = checkRowsAndColsForFibonacciSequences(matrix.current, SEQUENCE_LENGTH);
 
         setResults(result);
 
@@ -92,9 +92,10 @@ export function Game() {
 
             // Clear results on a timeout
             timer = setTimeout(() => {
-                matrix.clearSequencesFromResultObject(result);
+                matrix.current?.clearSequencesFromResultObject(result);
                 setResults(undefined);
                 setDisabled(false);
+                setCount(count + 1);
             }, RESET_TIME_IN_SECONDS * 1000);
         }
         return () => {
@@ -102,32 +103,10 @@ export function Game() {
         };
     }, [matrix, count]);
 
-    const renderBodyCell = ({
-        columnIndex,
-        rowIndex,
-        style
-    }: {
-        columnIndex: number;
-        rowIndex: number;
-        style: CSSProperties;
-    }) => {
-        return (
-            <Button
-                key={`${rowIndex}-${columnIndex}`}
-                value={<>{matrix?.get(rowIndex, columnIndex)}</>}
-                row={rowIndex}
-                col={columnIndex}
-                disabled={disabled}
-                style={style}
-                active={isPartOfSequence(columnIndex, rowIndex, results)}
-                onClick={() => handleClick(rowIndex, columnIndex)}
-            />
-        );
-    };
-
     return (
         <div>
             <Toolbar
+                disabled={matrix.current === undefined}
                 results={results}
                 resetTime={RESET_TIME_IN_SECONDS}
                 performance={performance}
@@ -135,22 +114,50 @@ export function Game() {
                 onChangeGridSize={handleChangeGridSize}
                 onReset={handleResetState}
             />
-
             <Box sx={{ display: 'flex', height: 20 }} />
 
             {error ? (
-                <div>{error}</div>
+                <Alert
+                    variant="soft"
+                    color="danger"
+                    invertedColors
+                    sx={{ alignItems: 'flex-start', gap: '1rem' }}
+                >
+                    <Box sx={{ flex: 1 }}>
+                        <Typography level="title-md">Incorrect browser</Typography>
+                        <Typography level="body-md">{error}</Typography>
+                    </Box>
+                </Alert>
             ) : matrix ? (
                 <AutoSizer disableHeight>
                     {({ width }) => (
                         <Grid
-                            cellRenderer={renderBodyCell}
-                            columnWidth={22}
-                            columnCount={gridSize}
+                            width={width}
                             height={300}
                             rowHeight={22}
+                            columnWidth={22}
                             rowCount={gridSize}
-                            width={width}
+                            columnCount={gridSize}
+                            cellRenderer={({
+                                columnIndex,
+                                rowIndex,
+                                style
+                            }: {
+                                columnIndex: number;
+                                rowIndex: number;
+                                style: CSSProperties;
+                            }) => (
+                                <Button
+                                    key={`${rowIndex}-${columnIndex}`}
+                                    value={<>{matrix.current?.get(rowIndex, columnIndex)}</>}
+                                    row={rowIndex}
+                                    col={columnIndex}
+                                    disabled={disabled}
+                                    style={style}
+                                    active={isPartOfSequence(columnIndex, rowIndex, results)}
+                                    onClick={() => handleClick(rowIndex, columnIndex)}
+                                />
+                            )}
                             containerStyle={{ display: 'flex' }}
                         />
                     )}

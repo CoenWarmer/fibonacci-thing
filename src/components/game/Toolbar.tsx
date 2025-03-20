@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import CountUp from 'react-countup';
 
-import { Box, CircularProgress } from '@mui/joy';
+import { Box, CircularProgress, IconButton } from '@mui/joy';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import MuiTypography from '@mui/joy/Typography';
 
@@ -9,9 +9,9 @@ import { GridSlider } from './GridSlider';
 import { Memory } from './Memory';
 import { Button } from '../atoms/Button';
 import { getTotalSequences, SequenceFoundResultObj } from '../../utils/sequences';
-import { init } from 'next/dist/compiled/webpack/webpack';
 
 export function Toolbar({
+    disabled,
     results,
     resetTime,
     performance,
@@ -19,6 +19,7 @@ export function Toolbar({
     onChangeGridSize,
     onReset
 }: {
+    disabled: boolean;
     results: SequenceFoundResultObj | undefined;
     resetTime: number;
     initialGridSize: number;
@@ -96,21 +97,16 @@ export function Toolbar({
             >
                 {loading ? <CircularProgress /> : null}
                 <GridSlider
+                    disabled={disabled}
                     gridSize={gridSize}
                     onChange={() => setLoading(true)}
                     onChangeGridSize={handleChangeGridSize}
                 />
                 <Memory performance={performance} />
-                <Button
-                    value={
-                        <>
-                            Reset
-                            <RestartAltIcon color="info" />
-                        </>
-                    }
-                    big
-                    onClick={onReset}
-                />
+                <IconButton disabled={disabled} variant="solid" color="primary" onClick={onReset}>
+                    Reset
+                    <RestartAltIcon />
+                </IconButton>
             </Box>
         </Box>
     );
