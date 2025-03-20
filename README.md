@@ -7,6 +7,8 @@
 A game with a 50x50 grid of buttons (now configurable all the way up to 5000x5000 = 25.000.000 cells) that allows a user to click on a cell and increment the value of all the cells in the same row and column by 1. 
 If in this process one or more fibonacci sequences of 5 values are found, we color the sequence so the user can easily spot them. Then, after 5 seconds, we reset the found sequence back to zeroes.
 
+Includes a performance debugging tools to discover the edges of React and browser capabilities. Toggle web workers on or off to see the impact on memory usage and latency.
+
 **Deployed version: https://fibonacci-thing.netlify.app/**
 
 ## 🦾 Technologies
