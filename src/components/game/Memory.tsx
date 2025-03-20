@@ -37,7 +37,15 @@ export function Memory({ performance }: { performance: BrowserPerformance }) {
         : 0;
 
     return stateMemory ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: 'rgb(244, 250, 254)',
+                padding: '12px',
+                borderRadius: '8px'
+            }}
+        >
             <ToolbarElementHeader icon={MemoryOutlined} title="Memory" />
 
             <Box
@@ -48,7 +56,8 @@ export function Memory({ performance }: { performance: BrowserPerformance }) {
                     height: '36px',
                     border: 'solid 2px rgb(221, 231, 238)',
                     borderRadius: '6px',
-                    mt: '8px'
+                    mt: '8px',
+                    background: '#fff'
                 }}
             >
                 <Box

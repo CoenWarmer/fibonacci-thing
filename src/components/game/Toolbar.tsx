@@ -114,7 +114,7 @@ export function Toolbar({
             <Box
                 sx={{
                     display: 'flex',
-                    alignItems: 'center',
+                    alignItems: 'stretch',
                     flexGrow: 0,
                     gap: 4
                 }}
@@ -127,16 +127,19 @@ export function Toolbar({
                     onChangeGridSize={handleChangeGridSize}
                 />
                 <Memory performance={performance} />
-                <IconButton
-                    disabled={disabled}
-                    color="primary"
-                    variant="solid"
-                    sx={{ padding: '8px 10px', gap: '4px' }}
-                    onClick={onReset}
-                >
-                    Reset
-                    <RestartAltIcon />
-                </IconButton>
+
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <IconButton
+                        disabled={disabled}
+                        color="primary"
+                        variant="solid"
+                        sx={{ padding: '8px 10px', gap: '4px' }}
+                        onClick={onReset}
+                    >
+                        Reset
+                        <RestartAltIcon />
+                    </IconButton>
+                </Box>
             </Box>
         </Box>
     );

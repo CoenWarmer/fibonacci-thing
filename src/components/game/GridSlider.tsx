@@ -14,7 +14,16 @@ export function GridSlider({
     onChangeGridSize: (value: number) => void;
 }) {
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 300 }}>
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                minWidth: 300,
+                backgroundColor: 'rgb(244, 250, 254)',
+                padding: '12px',
+                borderRadius: '8px'
+            }}
+        >
             <ToolbarElementHeader icon={Apps} title="Grid size" />
 
             <Slider
