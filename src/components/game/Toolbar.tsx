@@ -34,7 +34,7 @@ export function Toolbar({
 }) {
     const [loading, setLoading] = useState(false);
     const [gridSize, setGridSize] = useState(initialGridSize);
-    const [message, setMessage] = useState('Click on the grid to start upping values.');
+    const [message, setMessage] = useState('Click on the grid to create a fibonacci sequence.');
 
     const foundSequences = getTotalSequences(results);
 

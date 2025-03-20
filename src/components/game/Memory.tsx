@@ -79,8 +79,6 @@ export function Memory({
         ]
     };
 
-    console.log('data', data);
-
     return (
         <Box
             sx={{
@@ -91,8 +89,8 @@ export function Memory({
                 borderRadius: '8px'
             }}
         >
-            <ToolbarElementHeader icon={MemoryOutlined} title="Memory" />
-
+            <ToolbarElementHeader icon={MemoryOutlined} title="Memory usage" />
+            <Box sx={{ mb: '3px' }} />
             {/* <Box
                 sx={{
                     display: 'flex',

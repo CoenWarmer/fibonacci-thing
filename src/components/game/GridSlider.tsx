@@ -65,7 +65,7 @@ export function GridSlider({
                     color={isWorkerEnabled ? 'success' : 'neutral'}
                     variant={isWorkerEnabled ? 'solid' : 'outlined'}
                     endDecorator={isWorkerEnabled ? 'On' : 'Off'}
-                    sx={{ mt: '8px' }}
+                    sx={{ mt: '8px', mb: '8px' }}
                     slotProps={{
                         endDecorator: {
                             sx: {
