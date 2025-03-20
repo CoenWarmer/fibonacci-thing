@@ -5,11 +5,13 @@ import { ToolbarElementHeader } from './ToolbarElementHeader';
 export function GridSlider({
     disabled,
     gridSize,
+    perfTime,
     onChange,
     onChangeGridSize
 }: {
     disabled: boolean;
     gridSize: number;
+    perfTime: number | undefined;
     onChange: () => void;
     onChangeGridSize: (value: number) => void;
 }) {
@@ -39,6 +41,8 @@ export function GridSlider({
             <Typography component="p" fontSize={10} sx={{ mt: '2px' }}>
                 Current size: {gridSize} * {gridSize} ={' '}
                 {(gridSize * gridSize).toLocaleString('en-US')} cells
+                <br />
+                {perfTime === undefined ? '' : `Last grid calculation took ${perfTime} ms`}
             </Typography>
         </Box>
     );

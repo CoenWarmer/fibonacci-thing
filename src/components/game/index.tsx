@@ -1,4 +1,6 @@
-import { CSSProperties, useEffect, useRef, useState } from 'react';
+'use client';
+
+import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { AutoSizer, Grid } from 'react-virtualized';
 import 'react-virtualized/styles.css';
@@ -20,53 +22,54 @@ const RESET_TIME_IN_SECONDS = 5;
 
 export function Game() {
     const [gridSize, setGridSize] = useState(INITIAL_GRID_SIZE);
+
     const [count, setCount] = useState(0);
     const [error, setError] = useState('');
 
-    const matrix = useRef<Matrix | undefined>(undefined);
+    const [isWorkerEnabled, setIsWorkerEnabled] = useState<boolean | undefined>(undefined);
 
-    // First we check the memory usage of the matrix
-    useEffect(() => {
-        const memory = (performance as any)?.memory;
-        if (memory) {
-            if (estimateMatrixMemoryUsage(gridSize, gridSize) > memory.usedJSHeapSize) {
-                setError('Matrix will not fit in memory.');
-            } else {
-                matrix.current = new Matrix(gridSize, gridSize);
-            }
-        } else {
-            console.log('performance.memory is not available in this browser.');
-            setError(
-                'This app needs a browser that supports performance.memory to determine whether or not the matrix object will fit in memory. Please use a V8 based browser.'
-            );
-        }
-    }, [gridSize]);
+    const matrix = useRef<Matrix | undefined>(undefined);
+    const matrixWorker = useRef<Worker>(undefined);
 
     const [results, setResults] = useState<SequenceFoundResultObj | undefined>();
     const [disabled, setDisabled] = useState(false);
 
-    const handleClick = (x: number, y: number) => {
-        if (matrix.current === undefined) {
+    const renderDuration = useRef<PerformanceMeasure | undefined>(undefined);
+
+    // First we check the memory usage of the matrix
+    useEffect(() => {
+        const memory = (performance as any)?.memory;
+        if (!memory) {
+            console.log('performance.memory is not available in this browser.');
+            setError(
+                'This app needs a browser that supports performance.memory to determine whether or not the matrix object will fit in memory. Please use a V8 based browser.'
+            );
+
             return;
         }
 
-        matrix.current?.increment(x, y);
+        // So we got memory usage checks in the browser
+        if (estimateMatrixMemoryUsage(gridSize, gridSize) > memory.usedJSHeapSize) {
+            setError('Matrix will not fit in memory.');
+            return;
+        }
 
-        setCount(count + 1);
-    };
+        if (!window.Worker || isWorkerEnabled === false) {
+            createMatrixWithoutWorker(gridSize);
+            return;
+        }
 
-    const handleChangeGridSize = (newGridSize: number) => {
-        matrix.current = new Matrix(newGridSize, newGridSize);
-        setGridSize(newGridSize);
-        setResults(undefined);
-        setCount(count + 1);
-    };
+        // We got web worker support, so enable it by default
+        if (isWorkerEnabled === undefined) {
+            setIsWorkerEnabled(true);
 
-    const handleResetState = () => {
-        matrix.current = new Matrix(gridSize, gridSize);
-        setCount(count + 1);
-        setResults(undefined);
-    };
+            if (!matrixWorker.current) {
+                setupWorker();
+            }
+        }
+
+        createMatrixWithWorker(gridSize);
+    }, [gridSize]);
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
@@ -102,6 +105,99 @@ export function Game() {
         };
     }, [matrix, count]);
 
+    // Clean the worker when unmounting the component
+    useEffect(() => {
+        return () => {
+            removeWorker();
+        };
+    }, []);
+
+    const handleClick = (x: number, y: number) => {
+        if (matrix.current === undefined) {
+            return;
+        }
+
+        matrix.current?.increment(x, y);
+
+        setCount(count + 1);
+    };
+
+    const handleChangeGridSize = (newGridSize: number) => {
+        if (matrixWorker.current) {
+            createMatrixWithWorker(newGridSize);
+        } else {
+            matrix.current = new Matrix(newGridSize, newGridSize, { prefillArray: true });
+        }
+
+        setGridSize(newGridSize);
+        setResults(undefined);
+        setCount(count + 1);
+    };
+
+    const createMatrixWithWorker = (newGridSize: number) => {
+        if (matrixWorker.current) {
+            matrixWorker.current.postMessage(newGridSize);
+        }
+    };
+
+    const createMatrixWithoutWorker = (newGridSize: number) => {
+        matrix.current = new Matrix(newGridSize, newGridSize, { prefillArray: true });
+    };
+
+    const handleResetState = () => {
+        if (matrixWorker.current && isWorkerEnabled) {
+            matrixWorker.current.postMessage(gridSize);
+        } else {
+            createMatrixWithoutWorker(gridSize);
+        }
+        setCount(count + 1);
+        setResults(undefined);
+    };
+
+    const handleToggleWorker = (isEnabled: boolean) => {
+        if (isEnabled) {
+            setupWorker();
+        } else {
+            removeWorker();
+        }
+        setIsWorkerEnabled(isEnabled);
+    };
+
+    const setupWorker = () => {
+        if (matrixWorker.current) return; // Worker is already set up.
+
+        const worker = new Worker(new URL('./matrix.worker', import.meta.url));
+        matrixWorker.current = worker;
+
+        matrixWorker.current.addEventListener('message', (event) => {
+            // Reconstruct the Matrix instance from the serialized data
+            const newlyCreatedMatrix = new Matrix(gridSize, gridSize, { prefillArray: false });
+            newlyCreatedMatrix.data = event.data; // Restore the Float32Array data
+
+            matrix.current = newlyCreatedMatrix;
+
+            setCount(count + 1);
+        });
+    };
+
+    const removeWorker = () => {
+        if (!matrixWorker.current) return;
+
+        matrixWorker.current.terminate();
+        matrixWorker.current = undefined;
+    };
+
+    performance.mark('start-render');
+
+    useEffect(() => {
+        performance.mark('component-settled');
+        renderDuration.current = performance.measure(
+            'Render Duration',
+            'start-render',
+            'component-settled'
+        );
+    });
+
     return (
         <>
             <Toolbar
@@ -110,6 +206,13 @@ export function Game() {
                 resetTime={RESET_TIME_IN_SECONDS}
                 performance={performance}
                 initialGridSize={gridSize}
+                perfTime={
+                    renderDuration.current !== undefined
+                        ? Math.floor(renderDuration.current.duration)
+                        : undefined
+                }
+                isWorkerEnabled={Boolean(isWorkerEnabled)}
+                onToggleWorker={handleToggleWorker}
                 onChangeGridSize={handleChangeGridSize}
                 onReset={handleResetState}
             />
@@ -127,7 +230,7 @@ export function Game() {
                         <Typography level="body-md">{error}</Typography>
                     </Box>
                 </Alert>
-            ) : matrix ? (
+            ) : matrix.current ? (
                 <AutoSizer disableHeight>
                     {({ width }) => (
                         <Grid

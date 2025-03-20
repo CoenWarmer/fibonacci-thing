@@ -5,10 +5,10 @@ export class Matrix {
     cols: number;
     data: Float32Array;
 
-    constructor(rows: number, cols: number) {
+    constructor(rows: number, cols: number, opts: { prefillArray: boolean }) {
         this.rows = rows;
         this.cols = cols;
-        this.data = new Float32Array(rows * cols);
+        this.data = opts.prefillArray ? new Float32Array(rows * cols) : new Float32Array();
     }
 
     // Get value at (row, col)

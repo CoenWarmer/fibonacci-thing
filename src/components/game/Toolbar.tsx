@@ -1,30 +1,36 @@
 import { useEffect, useState } from 'react';
 import CountUp from 'react-countup';
 
-import { Box, CircularProgress, IconButton } from '@mui/joy';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import { Box, CircularProgress } from '@mui/joy';
 import MuiTypography from '@mui/joy/Typography';
 
 import { GridSlider } from './GridSlider';
 import { Memory } from './Memory';
 import { getTotalSequences, SequenceFoundResultObj } from '../../utils/sequences';
 import { Pattern } from '@mui/icons-material';
+import { ToolbarWorkerSwitch } from './ToolbarWorkerSwitch';
 
 export function Toolbar({
     disabled,
     results,
     resetTime,
     performance,
+    perfTime,
     initialGridSize,
+    isWorkerEnabled,
     onChangeGridSize,
+    onToggleWorker,
     onReset
 }: {
     disabled: boolean;
     results: SequenceFoundResultObj | undefined;
     resetTime: number;
     initialGridSize: number;
-    onChangeGridSize: (gridSize: number) => void;
     performance?: any;
+    perfTime: number | undefined;
+    isWorkerEnabled: boolean;
+    onChangeGridSize: (gridSize: number) => void;
+    onToggleWorker: (enabled: boolean) => void;
     onReset: () => void;
 }) {
     const [loading, setLoading] = useState(false);
@@ -36,6 +42,10 @@ export function Toolbar({
     const handleChangeGridSize = (newGridSize: number) => {
         setGridSize(newGridSize);
         onChangeGridSize(newGridSize);
+        setLoading(true);
+    };
+
+    const handleChange = () => {
         setLoading(true);
     };
 
@@ -123,23 +133,19 @@ export function Toolbar({
                 <GridSlider
                     disabled={disabled}
                     gridSize={gridSize}
-                    onChange={() => setLoading(true)}
+                    perfTime={perfTime}
+                    onChange={handleChange}
                     onChangeGridSize={handleChangeGridSize}
                 />
+
                 <Memory performance={performance} />
 
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <IconButton
-                        disabled={disabled}
-                        color="primary"
-                        variant="solid"
-                        sx={{ padding: '8px 10px', gap: '4px' }}
-                        onClick={onReset}
-                    >
-                        Reset
-                        <RestartAltIcon />
-                    </IconButton>
-                </Box>
+                <ToolbarWorkerSwitch
+                    isWorkerEnabled={isWorkerEnabled}
+                    onToggleWorker={onToggleWorker}
+                    onReset={onReset}
+                    disabled={disabled}
+                />
             </Box>
         </Box>
     );
