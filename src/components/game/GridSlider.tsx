@@ -23,7 +23,7 @@ export function GridSlider({
                 step={1}
                 min={5}
                 max={5000}
-                defaultValue={gridSize}
+                value={gridSize}
                 onChange={onChange}
                 onChangeCommitted={(_, value) => onChangeGridSize(value as number)}
             />

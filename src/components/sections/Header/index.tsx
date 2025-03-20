@@ -4,6 +4,7 @@ import { Link } from '../../atoms/Link';
 
 import MuiBox from '@mui/joy/Box';
 import MuiTypography from '@mui/joy/Typography';
+import { Pattern } from '@mui/icons-material';
 
 export type Props = types.Header & types.StackbitObjectId;
 
@@ -12,19 +13,32 @@ export const Header: React.FC<Props> = (props) => {
 
     return (
         <>
-            {title && (
-                <MuiBox sx={{ mb: 1, mr: 2, flexGrow: 1 }}>
+            {/* {title && (
+                <MuiBox
+                    sx={{
+                        mb: 5,
+                        mr: 2,
+                        mt: 10
+                    }}
+                >
                     <MuiTypography
                         component="h1"
                         variant="plain"
                         color="primary"
-                        sx={{ fontSize: '1.5rem', fontWeight: 700 }}
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            gap: '3px',
+                            fontSize: '1.5rem',
+                            fontWeight: 900
+                        }}
                         data-sb-field-path=".title"
                     >
+                        <Pattern />
                         {title}
                     </MuiTypography>
                 </MuiBox>
-            )}
+            )} */}
             {navLinks.length > 0 && (
                 <MuiBox
                     component="nav"

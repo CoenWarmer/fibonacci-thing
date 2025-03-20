@@ -17,8 +17,14 @@ export function Memory({ performance }: { performance: BrowserPerformance }) {
     const [stateMemory, setStateMemory] = useState<V8Memory | undefined>();
 
     useEffect(() => {
-        setStateMemory(performance.memory);
-    }, []);
+        if (
+            performance &&
+            performance.memory &&
+            performance.memory.usedJSHeapSize !== stateMemory?.usedJSHeapSize
+        ) {
+            setStateMemory(performance.memory);
+        }
+    }, [performance?.memory?.usedJSHeapSize]);
 
     const { usedJSHeapSize, totalJSHeapSize, jsHeapSizeLimit } = stateMemory || {
         usedJSHeapSize: 0,
@@ -56,7 +62,7 @@ export function Memory({ performance }: { performance: BrowserPerformance }) {
                                 : relativeMemUsage < 80
                                   ? 'yellow'
                                   : 'red',
-                        padding: '6px 4px',
+                        padding: '0 8px',
                         borderRadius: '4px 0 0 4px ',
                         transition: 'all 0.3s ease-in-out'
                     }}
@@ -64,6 +70,7 @@ export function Memory({ performance }: { performance: BrowserPerformance }) {
                     <Typography
                         sx={{
                             fontSize: '12px',
+                            fontWeight: 'bold',
                             color:
                                 relativeMemUsage < 25
                                     ? 'white'
@@ -75,7 +82,7 @@ export function Memory({ performance }: { performance: BrowserPerformance }) {
                         In use: {Math.floor(usedJSHeapSize / (1024 * 1024))} MB
                     </Typography>
 
-                    <Typography sx={{ position: 'absolute', fontSize: '10px', right: 4 }}>
+                    <Typography sx={{ position: 'absolute', fontSize: '10px', right: '8px' }}>
                         Current heap size:
                         {Math.floor(totalJSHeapSize / (1024 * 1024))} MB
                     </Typography>

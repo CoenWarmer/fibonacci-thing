@@ -93,8 +93,8 @@ export function Game() {
             timer = setTimeout(() => {
                 matrix.current?.clearSequencesFromResultObject(result);
                 setResults(undefined);
-                setDisabled(false);
                 setCount(count + 1);
+                setDisabled(false);
             }, RESET_TIME_IN_SECONDS * 1000);
         }
         return () => {

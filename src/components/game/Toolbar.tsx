@@ -7,8 +7,8 @@ import MuiTypography from '@mui/joy/Typography';
 
 import { GridSlider } from './GridSlider';
 import { Memory } from './Memory';
-import { Button } from '../atoms/Button';
 import { getTotalSequences, SequenceFoundResultObj } from '../../utils/sequences';
+import { Pattern } from '@mui/icons-material';
 
 export function Toolbar({
     disabled,
@@ -69,18 +69,42 @@ export function Toolbar({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                margin: '20px 0'
+                margin: '80px 0 30px'
             }}
         >
             <Box
                 sx={{
-                    marginRight: '20px'
+                    mr: 2
                 }}
             >
+                <MuiTypography
+                    component="h1"
+                    variant="plain"
+                    color="primary"
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: '3px',
+                        fontSize: '1.5rem',
+                        fontWeight: 900
+                    }}
+                    data-sb-field-path=".title"
+                >
+                    <Pattern />
+                    Fibonacci Thing&#8482;
+                </MuiTypography>
+
                 {results?.col.length || results?.row.length ? (
                     <>
-                        Nice! Found {foundSequences} sequences. Resetting in...{' '}
-                        <CountUp start={resetTime} end={0} duration={resetTime} useEasing={false} />
+                        <MuiTypography>
+                            Nice! Found {foundSequences} sequences. Resetting in...{' '}
+                            <CountUp
+                                start={resetTime}
+                                end={0}
+                                duration={resetTime}
+                                useEasing={false}
+                            />
+                        </MuiTypography>
                     </>
                 ) : (
                     <MuiTypography>{message}</MuiTypography>
@@ -95,7 +119,7 @@ export function Toolbar({
                     gap: 4
                 }}
             >
-                {loading ? <CircularProgress /> : null}
+                <Box sx={{ width: '40px' }}>{loading ? <CircularProgress /> : null}</Box>
                 <GridSlider
                     disabled={disabled}
                     gridSize={gridSize}

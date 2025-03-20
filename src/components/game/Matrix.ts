@@ -18,7 +18,7 @@ export class Matrix {
 
     // Set value at (row, col)
     set(row: number, col: number, value: number): void {
-        this.data[col * this.cols + row] = value;
+        this.data[row * this.cols + col] = value;
     }
 
     getRow(row: number): number[] {
@@ -51,6 +51,7 @@ export class Matrix {
     }
 
     clearSequencesFromResultObject(result: SequenceFoundResultObj): void {
+        console.log('result', result);
         for (const row of result.row) {
             for (const sequence of row.sequences) {
                 this.clearSequenceFromRow(row.index, sequence.start, sequence.end);
