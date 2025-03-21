@@ -1,20 +1,20 @@
 'use client';
 
-import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { AutoSizer, Grid } from 'react-virtualized';
 import 'react-virtualized/styles.css';
 
-import { Legend } from './Legend';
 import { Button } from '../atoms/Button';
 import {
     checkRowsAndColsForFibonacciSequences,
     isPartOfSequence,
     type SequenceFoundResultObj
 } from '../../utils/sequences';
-import { Toolbar } from './Toolbar';
-import { estimateMatrixMemoryUsage, Matrix } from './Matrix';
+import { Toolbar } from './Toolbar/Toolbar';
+import { estimateMatrixMemoryUsage, Matrix } from './Matrix/Matrix';
 import { Alert, Box, Typography } from '@mui/joy';
+import { ElementContainer } from './Toolbar/ElementContainer';
 
 const INITIAL_GRID_SIZE = 50;
 const SEQUENCE_LENGTH = 5;
@@ -23,7 +23,8 @@ const RESET_TIME_IN_SECONDS = 5;
 export function Game() {
     const [gridSize, setGridSize] = useState(INITIAL_GRID_SIZE);
 
-    const [count, setCount] = useState(0);
+    const [count, setCount] = useState(0); // As we're side-stepping React's state management, we need a mechanism to force a re-render
+
     const [error, setError] = useState('');
 
     const [isWorkerEnabled, setIsWorkerEnabled] = useState<boolean | undefined>(undefined);
@@ -134,6 +135,14 @@ export function Game() {
         setCount(count + 1);
     };
 
+    const createMatrix = (newGridSize: number) => {
+        if (matrixWorker.current && isWorkerEnabled) {
+            matrixWorker.current.postMessage(newGridSize);
+        } else {
+            createMatrixWithoutWorker(newGridSize);
+        }
+    };
+
     const createMatrixWithWorker = (newGridSize: number) => {
         if (matrixWorker.current) {
             matrixWorker.current.postMessage(newGridSize);
@@ -145,11 +154,9 @@ export function Game() {
     };
 
     const handleResetState = () => {
-        if (matrixWorker.current && isWorkerEnabled) {
-            matrixWorker.current.postMessage(gridSize);
-        } else {
-            createMatrixWithoutWorker(gridSize);
-        }
+        const gridSize = INITIAL_GRID_SIZE;
+        createMatrix(gridSize);
+        setGridSize(gridSize);
         setCount(count + 1);
         setResults(undefined);
     };
@@ -166,7 +173,7 @@ export function Game() {
     const setupWorker = () => {
         if (matrixWorker.current) return; // Worker is already set up.
 
-        const worker = new Worker(new URL('./matrix.worker', import.meta.url));
+        const worker = new Worker(new URL('./Matrix/matrix.worker', import.meta.url));
         matrixWorker.current = worker;
 
         matrixWorker.current.addEventListener('message', (event) => {
@@ -189,6 +196,7 @@ export function Game() {
         matrixWorker.current = undefined;
     };
 
+    // Render time checking
     performance.mark('start-render');
 
     useEffect(() => {
@@ -233,42 +241,44 @@ export function Game() {
                     </Box>
                 </Alert>
             ) : matrix.current ? (
-                <AutoSizer disableHeight>
-                    {({ width }) => (
-                        <Grid
-                            width={width}
-                            height={300}
-                            rowHeight={22}
-                            columnWidth={22}
-                            rowCount={gridSize}
-                            columnCount={gridSize}
-                            cellRenderer={({
-                                columnIndex,
-                                rowIndex,
-                                style
-                            }: {
-                                columnIndex: number;
-                                rowIndex: number;
-                                style: CSSProperties;
-                            }) => (
-                                <Button
-                                    key={`${rowIndex}-${columnIndex}`}
-                                    value={<>{matrix.current?.get(rowIndex, columnIndex)}</>}
-                                    row={rowIndex}
-                                    col={columnIndex}
-                                    disabled={disabled}
-                                    style={style}
-                                    active={isPartOfSequence(columnIndex, rowIndex, results)}
-                                    onClick={() => handleClick(rowIndex, columnIndex)}
-                                />
-                            )}
-                            containerStyle={{
-                                display: 'flex',
-                                backgroundColor: 'rgb(221, 231, 238)'
-                            }}
-                        />
-                    )}
-                </AutoSizer>
+                <ElementContainer>
+                    <AutoSizer disableHeight>
+                        {({ width }) => (
+                            <Grid
+                                width={width}
+                                height={300}
+                                rowHeight={22}
+                                columnWidth={22}
+                                rowCount={gridSize}
+                                columnCount={gridSize}
+                                cellRenderer={({
+                                    columnIndex,
+                                    rowIndex,
+                                    style
+                                }: {
+                                    columnIndex: number;
+                                    rowIndex: number;
+                                    style: CSSProperties;
+                                }) => (
+                                    <Button
+                                        key={`${rowIndex}-${columnIndex}`}
+                                        value={<>{matrix.current?.get(rowIndex, columnIndex)}</>}
+                                        row={rowIndex}
+                                        col={columnIndex}
+                                        disabled={disabled}
+                                        style={style}
+                                        active={isPartOfSequence(columnIndex, rowIndex, results)}
+                                        onClick={() => handleClick(rowIndex, columnIndex)}
+                                    />
+                                )}
+                                containerStyle={{
+                                    display: 'flex',
+                                    backgroundColor: 'rgb(221, 231, 238)'
+                                }}
+                            />
+                        )}
+                    </AutoSizer>
+                </ElementContainer>
             ) : null}
         </>
     );

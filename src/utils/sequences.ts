@@ -1,4 +1,4 @@
-import { Matrix } from '../components/game/Matrix';
+import { Matrix } from '../components/game/Matrix/Matrix';
 
 export type SequenceFoundResultObj = {
     row: SequenceFoundResult[];

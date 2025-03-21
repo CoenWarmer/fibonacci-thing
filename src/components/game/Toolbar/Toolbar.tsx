@@ -5,8 +5,8 @@ import { Box, CircularProgress } from '@mui/joy';
 import MuiTypography from '@mui/joy/Typography';
 
 import { GridSlider } from './GridSlider';
-import { Memory } from './Memory';
-import { getTotalSequences, SequenceFoundResultObj } from '../../utils/sequences';
+import { MemoryMonitor } from './MemoryMonitor';
+import { getTotalSequences, SequenceFoundResultObj } from '../../../utils/sequences';
 import { Pattern } from '@mui/icons-material';
 
 export function Toolbar({
@@ -48,6 +48,11 @@ export function Toolbar({
         setLoading(true);
     };
 
+    const handleReset = () => {
+        setLoading(true);
+        onReset();
+    };
+
     useEffect(() => {
         const MESSAGES = [
             'Keep going!',
@@ -67,10 +72,14 @@ export function Toolbar({
     }, [foundSequences]);
 
     useEffect(() => {
-        if (initialGridSize === gridSize) {
-            setLoading(false);
+        if (initialGridSize !== gridSize) {
+            setGridSize(initialGridSize);
         }
     }, [initialGridSize]);
+
+    useEffect(() => {
+        setLoading(false);
+    }, [onReset]);
 
     return (
         <Box
@@ -78,7 +87,12 @@ export function Toolbar({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                margin: '80px 0 30px'
+                margin: '80px 0 30px',
+
+                flexDirection: {
+                    xs: 'column',
+                    md: 'row'
+                }
             }}
         >
             <Box
@@ -125,7 +139,12 @@ export function Toolbar({
                     display: 'flex',
                     alignItems: 'stretch',
                     flexGrow: 0,
-                    gap: 4
+                    gap: 4,
+
+                    flexDirection: {
+                        xs: 'column',
+                        md: 'row'
+                    }
                 }}
             >
                 <Box sx={{ width: '40px' }}>{loading ? <CircularProgress /> : null}</Box>
@@ -137,10 +156,10 @@ export function Toolbar({
                     onToggleWorker={onToggleWorker}
                     onChange={handleChange}
                     onChangeGridSize={handleChangeGridSize}
-                    onReset={onReset}
+                    onReset={handleReset}
                 />
 
-                <Memory gridSize={gridSize} performance={performance} />
+                <MemoryMonitor gridSize={gridSize} performance={performance} />
             </Box>
         </Box>
     );

@@ -13,6 +13,7 @@ import { MemoryOutlined } from '@mui/icons-material';
 import { Box, Typography } from '@mui/joy';
 
 import { ToolbarElementHeader } from './ToolbarElementHeader';
+import { ElementContainer } from './ElementContainer';
 
 type V8Memory = {
     totalJSHeapSize: number;
@@ -26,7 +27,7 @@ export type BrowserPerformance = {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-export function Memory({
+export function MemoryMonitor({
     gridSize,
     performance
 }: {
@@ -80,15 +81,7 @@ export function Memory({
     };
 
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                backgroundColor: 'rgb(244, 250, 254)',
-                padding: '12px',
-                borderRadius: '8px'
-            }}
-        >
+        <ElementContainer>
             <ToolbarElementHeader icon={MemoryOutlined} title="Memory usage" />
             <Box sx={{ mb: '3px' }} />
             {/* <Box
@@ -171,6 +164,6 @@ export function Memory({
                 Currently allocated heap is {Math.floor((totalJSHeapSize / jsHeapSizeLimit) * 100)}%
                 of the total available heap size
             </Typography>
-        </Box>
+        </ElementContainer>
     );
 }

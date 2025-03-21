@@ -1,6 +1,8 @@
 import { Apps, Engineering, RestartAlt } from '@mui/icons-material';
 import { Box, IconButton, Slider, Switch, Typography } from '@mui/joy';
 import { ToolbarElementHeader } from './ToolbarElementHeader';
+import { ElementContainer } from './ElementContainer';
+import { useEffect, useState } from 'react';
 
 export function GridSlider({
     disabled,
@@ -21,21 +23,18 @@ export function GridSlider({
     onChangeGridSize: (value: number) => void;
     onReset: () => void;
 }) {
+    const [initialGridSize, setInitialGridSize] = useState(gridSize);
+
+    useEffect(() => {
+        if (initialGridSize !== gridSize) {
+            setInitialGridSize(gridSize);
+        }
+    }, [gridSize]);
+
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                minWidth: 300,
-                backgroundColor: 'rgb(244, 250, 254)',
-                padding: '12px',
-                borderRadius: '8px',
-                position: 'relative',
-                justifyContent: 'space-between'
-            }}
-        >
+        <ElementContainer>
             <Box>
-                <ToolbarElementHeader icon={Apps} title="Grid size" />
+                <ToolbarElementHeader icon={Apps} title={`Grid size (${gridSize})`} />
 
                 <Slider
                     disabled={disabled}
@@ -45,6 +44,7 @@ export function GridSlider({
                     max={5000}
                     sx={{ zIndex: 9 }}
                     defaultValue={gridSize}
+                    key={gridSize}
                     onChange={onChange}
                     onChangeCommitted={(_, value) => onChangeGridSize(value as number)}
                 />
@@ -93,6 +93,6 @@ export function GridSlider({
                     <RestartAlt />
                 </IconButton>
             </Box>
-        </Box>
+        </ElementContainer>
     );
 }
