@@ -79,6 +79,8 @@ export function Game() {
             return;
         }
 
+        // Expensive operation.
+
         const result = checkRowsAndColsForFibonacciSequences(matrix.current, SEQUENCE_LENGTH);
 
         setResults(result);
@@ -101,6 +103,7 @@ export function Game() {
                 setDisabled(false);
             }, RESET_TIME_IN_SECONDS * 1000);
         }
+
         return () => {
             clearTimeout(timer);
         };
@@ -124,12 +127,7 @@ export function Game() {
     };
 
     const handleChangeGridSize = (newGridSize: number) => {
-        if (matrixWorker.current) {
-            createMatrixWithWorker(newGridSize);
-        } else {
-            matrix.current = new Matrix(newGridSize, newGridSize, { prefillArray: true });
-        }
-
+        createMatrix(newGridSize);
         setGridSize(newGridSize);
         setResults(undefined);
         setCount(count + 1);
@@ -137,7 +135,7 @@ export function Game() {
 
     const createMatrix = (newGridSize: number) => {
         if (matrixWorker.current && isWorkerEnabled) {
-            matrixWorker.current.postMessage(newGridSize);
+            createMatrixWithWorker(newGridSize);
         } else {
             createMatrixWithoutWorker(newGridSize);
         }
@@ -154,9 +152,8 @@ export function Game() {
     };
 
     const handleResetState = () => {
-        const gridSize = INITIAL_GRID_SIZE;
-        createMatrix(gridSize);
-        setGridSize(gridSize);
+        createMatrix(INITIAL_GRID_SIZE);
+        setGridSize(INITIAL_GRID_SIZE);
         setCount(count + 1);
         setResults(undefined);
     };
