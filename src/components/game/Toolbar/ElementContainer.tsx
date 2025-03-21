@@ -1,6 +1,7 @@
 import { Box } from '@mui/joy';
+import { SxProps } from '@mui/system';
 
-export function ElementContainer({ children }: { children: React.ReactNode }) {
+export function ElementContainer({ children, sx }: { children: React.ReactNode; sx?: SxProps }) {
     return (
         <Box
             sx={{
@@ -15,7 +16,8 @@ export function ElementContainer({ children }: { children: React.ReactNode }) {
                 borderRadius: '8px',
                 position: 'relative',
                 justifyContent: 'space-between',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                ...sx
             }}
         >
             {children}

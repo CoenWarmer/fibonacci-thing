@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import CountUp from 'react-countup';
 
-import { Box, CircularProgress } from '@mui/joy';
+import { Box } from '@mui/joy';
 import MuiTypography from '@mui/joy/Typography';
 
 import { GridSlider } from './GridSlider';
@@ -17,7 +17,9 @@ export function Toolbar({
     perfTime,
     initialGridSize,
     isWorkerEnabled,
+    loading,
     onChangeGridSize,
+    onSetLoading,
     onToggleWorker,
     onReset
 }: {
@@ -25,14 +27,15 @@ export function Toolbar({
     results: SequenceFoundResultObj | undefined;
     resetTime: number;
     initialGridSize: number;
+    isWorkerEnabled: boolean;
+    loading: boolean;
     performance?: any;
     perfTime: number | undefined;
-    isWorkerEnabled: boolean;
     onChangeGridSize: (gridSize: number) => void;
+    onSetLoading: (loading: boolean) => void;
     onToggleWorker: (enabled: boolean) => void;
     onReset: () => void;
 }) {
-    const [loading, setLoading] = useState(false);
     const [gridSize, setGridSize] = useState(initialGridSize);
     const [message, setMessage] = useState('Click on the grid to create a fibonacci sequence.');
 
@@ -41,15 +44,15 @@ export function Toolbar({
     const handleChangeGridSize = (newGridSize: number) => {
         setGridSize(newGridSize);
         onChangeGridSize(newGridSize);
-        setLoading(true);
+        onSetLoading(true);
     };
 
     const handleChange = () => {
-        setLoading(true);
+        onSetLoading(true);
     };
 
     const handleReset = () => {
-        setLoading(true);
+        onSetLoading(true);
         onReset();
     };
 
@@ -77,10 +80,6 @@ export function Toolbar({
         }
     }, [initialGridSize]);
 
-    useEffect(() => {
-        setLoading(false);
-    }, [onReset]);
-
     return (
         <Box
             sx={{
@@ -92,12 +91,18 @@ export function Toolbar({
                 flexDirection: {
                     xs: 'column',
                     md: 'row'
+                },
+
+                textAlign: {
+                    xs: 'center',
+                    md: 'left'
                 }
             }}
         >
             <Box
                 sx={{
-                    mr: 2
+                    mr: 2,
+                    mb: { xs: 6, md: 0 }
                 }}
             >
                 <MuiTypography
@@ -139,7 +144,10 @@ export function Toolbar({
                     display: 'flex',
                     alignItems: 'stretch',
                     flexGrow: 0,
-                    gap: 4,
+                    gap: {
+                        xs: 2,
+                        md: 4
+                    },
 
                     flexDirection: {
                         xs: 'column',

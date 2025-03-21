@@ -34,7 +34,14 @@ export function GridSlider({
     }, [gridSize]);
 
     return (
-        <ElementContainer>
+        <ElementContainer
+            sx={{
+                maxWidth: {
+                    xs: '100%',
+                    md: 300
+                }
+            }}
+        >
             <Box>
                 <ToolbarElementHeader
                     icon={Apps}

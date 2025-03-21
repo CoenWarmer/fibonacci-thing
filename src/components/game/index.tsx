@@ -33,6 +33,8 @@ export function Game() {
     const matrix = useRef<Matrix | undefined>(undefined);
     const matrixWorker = useRef<MatrixWorker>(undefined);
 
+    const [loading, setLoading] = useState(false);
+
     const [results, setResults] = useState<SequenceFoundResultObj | undefined>();
     const [disabled, setDisabled] = useState(false);
 
@@ -97,6 +99,7 @@ export function Game() {
                 setResults(undefined);
                 setCount(count + 1);
                 setDisabled(false);
+                setLoading(false);
             }, RESET_TIME_IN_SECONDS * 1000);
         }
 
@@ -112,27 +115,12 @@ export function Game() {
         };
     }, []);
 
-    const checkMatrix = () => {
-        if (!matrix.current) return;
-
-        if (isWorkerEnabled && matrixWorker.current) {
-            matrixWorker.current.postMessage({
-                type: 'checkMatrix',
-                options: {
-                    gridSize,
-                    sequenceLength: SEQUENCE_LENGTH,
-                    data: Array.from(matrix.current.data)
-                }
-            });
-        } else {
-            setResults(checkRowsAndColsForFibonacciSequences(matrix.current, SEQUENCE_LENGTH));
-        }
-    };
-
     const handleClick = (x: number, y: number) => {
         if (matrix.current === undefined) {
             return;
         }
+
+        setLoading(true);
 
         matrix.current?.increment(x, y);
 
@@ -145,6 +133,22 @@ export function Game() {
         setGridSize(newGridSize);
         setResults(undefined);
         setCount(count + 1);
+    };
+
+    const handleResetState = () => {
+        createMatrix(INITIAL_GRID_SIZE);
+        setGridSize(INITIAL_GRID_SIZE);
+        setCount(count + 1);
+        setResults(undefined);
+    };
+
+    const handleToggleWorker = (isEnabled: boolean) => {
+        if (isEnabled) {
+            setupWorker();
+        } else {
+            removeWorker();
+        }
+        setIsWorkerEnabled(isEnabled);
     };
 
     const createMatrix = (newGridSize: number) => {
@@ -168,20 +172,23 @@ export function Game() {
         matrix.current = new Matrix(newGridSize, newGridSize, { prefillArray: true });
     };
 
-    const handleResetState = () => {
-        createMatrix(INITIAL_GRID_SIZE);
-        setGridSize(INITIAL_GRID_SIZE);
-        setCount(count + 1);
-        setResults(undefined);
-    };
+    const checkMatrix = () => {
+        if (!matrix.current) return;
 
-    const handleToggleWorker = (isEnabled: boolean) => {
-        if (isEnabled) {
-            setupWorker();
+        if (isWorkerEnabled && matrixWorker.current) {
+            matrixWorker.current.postMessage({
+                type: 'checkMatrix',
+                options: {
+                    gridSize,
+                    sequenceLength: SEQUENCE_LENGTH,
+                    data: Array.from(matrix.current.data)
+                }
+            });
         } else {
-            removeWorker();
+            setResults(checkRowsAndColsForFibonacciSequences(matrix.current, SEQUENCE_LENGTH));
+            setDisabled(false);
+            setLoading(false);
         }
-        setIsWorkerEnabled(isEnabled);
     };
 
     const setupWorker = () => {
@@ -210,6 +217,8 @@ export function Game() {
             matrix.current = newlyCreatedMatrix;
 
             setCount(count + 1);
+            setLoading(false);
+            setDisabled(false);
         }
 
         if (type === 'checkMatrix') {
@@ -217,6 +226,8 @@ export function Game() {
 
             setResults(result);
             setCount(count + 1);
+            setLoading(false);
+            setDisabled(false);
         }
     };
 
@@ -247,12 +258,14 @@ export function Game() {
                 resetTime={RESET_TIME_IN_SECONDS}
                 performance={performance}
                 initialGridSize={gridSize}
+                isWorkerEnabled={Boolean(isWorkerEnabled)}
+                loading={loading}
                 perfTime={
                     renderDuration.current !== undefined
                         ? Math.floor(renderDuration.current.duration)
                         : undefined
                 }
-                isWorkerEnabled={Boolean(isWorkerEnabled)}
+                onSetLoading={setLoading}
                 onToggleWorker={handleToggleWorker}
                 onChangeGridSize={handleChangeGridSize}
                 onReset={handleResetState}
@@ -267,7 +280,7 @@ export function Game() {
                     sx={{ alignItems: 'flex-start', gap: '1rem' }}
                 >
                     <Box sx={{ flex: 1 }}>
-                        <Typography level="title-md">Incorrect browser</Typography>
+                        <Typography level="title-md">Error</Typography>
                         <Typography level="body-md">{error}</Typography>
                     </Box>
                 </Alert>

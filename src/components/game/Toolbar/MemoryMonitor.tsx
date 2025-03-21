@@ -81,7 +81,14 @@ export function MemoryMonitor({
     };
 
     return (
-        <ElementContainer>
+        <ElementContainer
+            sx={{
+                maxWidth: {
+                    xs: '100%',
+                    md: 300
+                }
+            }}
+        >
             <ToolbarElementHeader
                 icon={MemoryOutlined}
                 title={`Memory usage (${Math.floor(usedJSHeapSize / (1024 * 1024))} MB)`}
