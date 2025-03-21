@@ -1,5 +1,5 @@
 import { Apps, Engineering, RestartAlt } from '@mui/icons-material';
-import { Box, IconButton, Slider, Switch, Typography } from '@mui/joy';
+import { Box, CircularProgress, IconButton, Slider, Switch, Typography } from '@mui/joy';
 import { ToolbarElementHeader } from './ToolbarElementHeader';
 import { ElementContainer } from './ElementContainer';
 import { useEffect, useState } from 'react';
@@ -8,20 +8,22 @@ export function GridSlider({
     disabled,
     gridSize,
     isWorkerEnabled,
-    onToggleWorker,
+    loading,
     perfTime,
     onChange,
     onChangeGridSize,
-    onReset
+    onReset,
+    onToggleWorker
 }: {
     disabled: boolean;
     gridSize: number;
-    perfTime: number | undefined;
     isWorkerEnabled: boolean;
-    onToggleWorker: (enabled: boolean) => void;
+    loading: boolean;
+    perfTime: number | undefined;
     onChange: () => void;
     onChangeGridSize: (value: number) => void;
     onReset: () => void;
+    onToggleWorker: (enabled: boolean) => void;
 }) {
     const [initialGridSize, setInitialGridSize] = useState(gridSize);
 
@@ -34,7 +36,22 @@ export function GridSlider({
     return (
         <ElementContainer>
             <Box>
-                <ToolbarElementHeader icon={Apps} title={`Grid size (${gridSize})`} />
+                <ToolbarElementHeader
+                    icon={Apps}
+                    title={`Grid size (${gridSize})`}
+                    component={
+                        <Box sx={{ width: '20px', height: '20px' }}>
+                            {loading ? (
+                                <CircularProgress
+                                    sx={{
+                                        '--CircularProgress-size': '20px',
+                                        '--_progress-thickness': '2px'
+                                    }}
+                                />
+                            ) : null}
+                        </Box>
+                    }
+                />
 
                 <Slider
                     disabled={disabled}
@@ -75,8 +92,8 @@ export function GridSlider({
                     }}
                 />
                 <Typography component="p" fontSize={10} sx={{ mt: '2px' }}>
-                    Use a Web Worker to generate the matrix. <br />
-                    Unblocks the main thread.
+                    Use a Web Worker to generate and check the matrix for sequences. Unblocks the
+                    main thread.
                 </Typography>
             </Box>
 

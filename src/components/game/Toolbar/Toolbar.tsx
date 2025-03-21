@@ -147,12 +147,12 @@ export function Toolbar({
                     }
                 }}
             >
-                <Box sx={{ width: '40px' }}>{loading ? <CircularProgress /> : null}</Box>
                 <GridSlider
                     disabled={disabled}
+                    loading={loading}
                     gridSize={gridSize}
-                    perfTime={perfTime}
                     isWorkerEnabled={isWorkerEnabled}
+                    perfTime={perfTime}
                     onToggleWorker={onToggleWorker}
                     onChange={handleChange}
                     onChangeGridSize={handleChangeGridSize}

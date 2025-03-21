@@ -15,6 +15,7 @@ import { Toolbar } from './Toolbar/Toolbar';
 import { estimateMatrixMemoryUsage, Matrix } from './Matrix/Matrix';
 import { Alert, Box, Typography } from '@mui/joy';
 import { ElementContainer } from './Toolbar/ElementContainer';
+import { MatrixWorker, MatrixWorkerResponse } from './Matrix/matrix.worker';
 
 const INITIAL_GRID_SIZE = 50;
 const SEQUENCE_LENGTH = 5;
@@ -30,7 +31,7 @@ export function Game() {
     const [isWorkerEnabled, setIsWorkerEnabled] = useState<boolean | undefined>(undefined);
 
     const matrix = useRef<Matrix | undefined>(undefined);
-    const matrixWorker = useRef<Worker>(undefined);
+    const matrixWorker = useRef<MatrixWorker>(undefined);
 
     const [results, setResults] = useState<SequenceFoundResultObj | undefined>();
     const [disabled, setDisabled] = useState(false);
@@ -79,25 +80,20 @@ export function Game() {
             return;
         }
 
-        // Expensive operation.
+        if (results?.col.length || results?.row.length) {
+            timer = setTimeout(() => {
+                setDisabled(true);
 
-        const result = checkRowsAndColsForFibonacciSequences(matrix.current, SEQUENCE_LENGTH);
-
-        setResults(result);
-
-        // We got some hits y'all
-        if (result.col.length || result.row.length) {
-            setDisabled(true);
-
-            confetti({
-                particleCount: 300,
-                spread: 200,
-                origin: { x: 0.5, y: 0.5 }
-            });
+                confetti({
+                    particleCount: 300,
+                    spread: 200,
+                    origin: { x: 0.5, y: 0.5 }
+                });
+            }, 0);
 
             // Clear results on a timeout
             timer = setTimeout(() => {
-                matrix.current?.clearSequencesFromResultObject(result);
+                matrix.current?.clearSequencesFromResultObject(results);
                 setResults(undefined);
                 setCount(count + 1);
                 setDisabled(false);
@@ -107,7 +103,7 @@ export function Game() {
         return () => {
             clearTimeout(timer);
         };
-    }, [matrix, count]);
+    }, [count, results]);
 
     // Clean the worker when unmounting the component
     useEffect(() => {
@@ -116,6 +112,23 @@ export function Game() {
         };
     }, []);
 
+    const checkMatrix = () => {
+        if (!matrix.current) return;
+
+        if (isWorkerEnabled && matrixWorker.current) {
+            matrixWorker.current.postMessage({
+                type: 'checkMatrix',
+                options: {
+                    gridSize,
+                    sequenceLength: SEQUENCE_LENGTH,
+                    data: Array.from(matrix.current.data)
+                }
+            });
+        } else {
+            setResults(checkRowsAndColsForFibonacciSequences(matrix.current, SEQUENCE_LENGTH));
+        }
+    };
+
     const handleClick = (x: number, y: number) => {
         if (matrix.current === undefined) {
             return;
@@ -123,6 +136,7 @@ export function Game() {
 
         matrix.current?.increment(x, y);
 
+        checkMatrix();
         setCount(count + 1);
     };
 
@@ -143,7 +157,10 @@ export function Game() {
 
     const createMatrixWithWorker = (newGridSize: number) => {
         if (matrixWorker.current) {
-            matrixWorker.current.postMessage(newGridSize);
+            matrixWorker.current.postMessage({
+                type: 'generateMatrix',
+                options: { gridSize: newGridSize }
+            });
         }
     };
 
@@ -170,20 +187,37 @@ export function Game() {
     const setupWorker = () => {
         if (matrixWorker.current) return; // Worker is already set up.
 
-        const worker = new Worker(new URL('./Matrix/matrix.worker', import.meta.url));
+        const worker = new Worker(
+            new URL('./Matrix/matrix.worker', import.meta.url)
+        ) as MatrixWorker;
         matrixWorker.current = worker;
 
-        matrixWorker.current.addEventListener('message', (event) => {
-            const { gridSize, arrayData } = event.data;
+        matrixWorker.current.addEventListener('message', handleWorkerResponse);
+    };
+
+    const handleWorkerResponse = (event: MessageEvent<MatrixWorkerResponse>) => {
+        const { type } = event.data;
+
+        if (type === 'generateMatrix') {
+            const { gridSize, arrayData } = event.data.response;
 
             // Reconstruct the Matrix instance from the serialized data
-            const newlyCreatedMatrix = new Matrix(gridSize, gridSize, { prefillArray: false });
-            newlyCreatedMatrix.data = arrayData; // Restore the Float32Array data
+            const newlyCreatedMatrix = new Matrix(gridSize, gridSize, {
+                prefillArray: false
+            });
+            newlyCreatedMatrix.data = new Float32Array(arrayData); // Restore the Float32Array data
 
             matrix.current = newlyCreatedMatrix;
 
             setCount(count + 1);
-        });
+        }
+
+        if (type === 'checkMatrix') {
+            const { result } = event.data.response;
+
+            setResults(result);
+            setCount(count + 1);
+        }
     };
 
     const removeWorker = () => {
