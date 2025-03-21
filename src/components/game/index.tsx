@@ -229,6 +229,10 @@ export function Game() {
             setLoading(false);
             setDisabled(false);
         }
+
+        if (type === 'checkMatrixProgress') {
+            setLoading(event.data.response.loading);
+        }
     };
 
     const removeWorker = () => {

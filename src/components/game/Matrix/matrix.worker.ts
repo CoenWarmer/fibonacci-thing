@@ -40,6 +40,12 @@ export type MatrixWorkerResponse =
           response: {
               result: SequenceFoundResultObj;
           };
+      }
+    | {
+          type: 'checkMatrixProgress';
+          response: {
+              loading: boolean;
+          };
       };
 
 onmessage = (event: MessageEvent<MatrixWorkerMessage>) => {
@@ -65,6 +71,8 @@ onmessage = (event: MessageEvent<MatrixWorkerMessage>) => {
 
     if (type === 'checkMatrix') {
         const { data, sequenceLength, gridSize } = event.data.options;
+
+        postMessage({ type: 'checkMatrixProgress', response: { loading: true } });
 
         const matrix = new Matrix(gridSize, gridSize, { prefillArray: false });
         matrix.data = new Float32Array(data);
