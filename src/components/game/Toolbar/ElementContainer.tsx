@@ -1,9 +1,19 @@
+import { RefObject } from 'react';
 import { Box } from '@mui/joy';
 import { SxProps } from '@mui/system';
 
-export function ElementContainer({ children, sx }: { children: React.ReactNode; sx?: SxProps }) {
+export function ElementContainer({
+    children,
+    sx,
+    ref
+}: {
+    children: React.ReactNode;
+    sx?: SxProps;
+    ref?: RefObject<HTMLDivElement | null>;
+}) {
     return (
         <Box
+            ref={ref}
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
