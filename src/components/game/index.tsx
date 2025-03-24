@@ -47,8 +47,8 @@ export function Game() {
         count: gridSize,
         getScrollElement: () => containerRef.current,
         estimateSize: () => 40,
-        overscan: 20,
-        debug: true
+        overscan: 0,
+        debug: false
     });
 
     const columnVirtualizer = useVirtualizer({
@@ -56,8 +56,8 @@ export function Game() {
         count: gridSize,
         getScrollElement: () => containerRef.current,
         estimateSize: () => 40,
-        overscan: 20,
-        debug: true
+        overscan: 0,
+        debug: false
     });
 
     // First we check the memory usage of the matrix
