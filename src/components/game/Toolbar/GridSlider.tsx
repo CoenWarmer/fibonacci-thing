@@ -19,7 +19,7 @@ export function GridSlider({
     gridSize: number;
     isWorkerEnabled: boolean;
     loading: boolean;
-    perfTime: number | undefined;
+    perfTime: number[] | undefined;
     onChange: () => void;
     onChangeGridSize: (value: number) => void;
     onReset: () => void;
@@ -76,7 +76,9 @@ export function GridSlider({
                     Current size: {gridSize} * {gridSize} ={' '}
                     {(gridSize * gridSize).toLocaleString('en-US')} cells
                     <br />
-                    {perfTime === undefined ? '' : `Last render took ${perfTime} ms`}
+                    {perfTime === undefined
+                        ? ''
+                        : `Last render took ${perfTime[0]} ms. Last check took ${perfTime[1]} ms.`}
                 </Typography>
             </Box>
 

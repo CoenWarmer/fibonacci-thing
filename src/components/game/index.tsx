@@ -39,6 +39,7 @@ export function Game() {
     const [disabled, setDisabled] = useState(false);
 
     const renderDuration = useRef<PerformanceMeasure | undefined>(undefined);
+    const checkDuration = useRef<PerformanceMeasure | undefined>(undefined);
 
     // First we check the memory usage of the matrix
     useEffect(() => {
@@ -170,10 +171,15 @@ export function Game() {
 
     const createMatrixWithoutWorker = (newGridSize: number) => {
         matrix.current = new Matrix(newGridSize, newGridSize, { prefillArray: true });
+        setCount(count + 1);
+        setLoading(false);
+        setDisabled(false);
     };
 
     const checkMatrix = () => {
         if (!matrix.current) return;
+
+        performance.mark('start-check');
 
         if (isWorkerEnabled && matrixWorker.current) {
             matrixWorker.current.postMessage({
@@ -186,6 +192,14 @@ export function Game() {
             });
         } else {
             setResults(checkRowsAndColsForFibonacciSequences(matrix.current, SEQUENCE_LENGTH));
+
+            performance.mark('end-check');
+            checkDuration.current = performance.measure(
+                'Check Duration',
+                'start-check',
+                'end-check'
+            );
+
             setDisabled(false);
             setLoading(false);
         }
@@ -223,6 +237,13 @@ export function Game() {
 
         if (type === 'checkMatrix') {
             const { result } = event.data.response;
+
+            performance.mark('end-check');
+            checkDuration.current = performance.measure(
+                'Check Duration',
+                'start-check',
+                'end-check'
+            );
 
             setResults(result);
             setCount(count + 1);
@@ -264,11 +285,14 @@ export function Game() {
                 initialGridSize={gridSize}
                 isWorkerEnabled={Boolean(isWorkerEnabled)}
                 loading={loading}
-                perfTime={
-                    renderDuration.current !== undefined
-                        ? Math.floor(renderDuration.current.duration)
-                        : undefined
-                }
+                perfTime={[
+                    renderDuration.current === undefined
+                        ? 0
+                        : Math.floor(renderDuration.current.duration),
+                    checkDuration.current === undefined
+                        ? 0
+                        : Math.floor(checkDuration.current.duration)
+                ]}
                 onSetLoading={setLoading}
                 onToggleWorker={handleToggleWorker}
                 onChangeGridSize={handleChangeGridSize}

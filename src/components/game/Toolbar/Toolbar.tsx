@@ -30,7 +30,7 @@ export function Toolbar({
     isWorkerEnabled: boolean;
     loading: boolean;
     performance?: any;
-    perfTime: number | undefined;
+    perfTime: number[] | undefined;
     onChangeGridSize: (gridSize: number) => void;
     onSetLoading: (loading: boolean) => void;
     onToggleWorker: (enabled: boolean) => void;
