@@ -37,11 +37,18 @@ export function findSequenceIndicesInArray(
     return indices;
 }
 
+let cachedFibonacci: number[] = [];
+
 export function findFibonacciSequence(arr: number[]): boolean {
     if (arr.length < 3) return false; // A Fibonacci sequence must have at least 3 numbers
 
     const maxNum = Math.max(...arr);
-    const fibonacciArray = generateFibonacci(maxNum);
+
+    if (!cachedFibonacci.length || maxNum > cachedFibonacci[cachedFibonacci.length - 1]) {
+        cachedFibonacci = generateFibonacci(maxNum);
+    }
+
+    const fibonacciArray = cachedFibonacci;
 
     // Check for contiguous Fibonacci sequence
     for (let i = 0; i < arr.length - 2; i++) {
