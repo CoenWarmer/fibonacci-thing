@@ -1,12 +1,7 @@
 /*
     Here we try to offload the matrix multiplication to a web worker.
     The problem we have is that the Matrix class is not serializable, 
-    which makes it less useful for web workers.
-    As a pragmatic solution we create the Floate32Array here, then 
-    convert is to an array, which _is_ serializable.
-
-    Further improvements can be made by crafting a data structure which
-    is more suitable for processing inside a webworker.
+    which makes it less useful to transfer via a web worker.
 */
 
 import { checkRowsAndColsForFibonacciSequences, SequenceFoundResultObj } from 'src/utils/sequences';
@@ -24,14 +19,14 @@ export type MatrixWorkerMessage =
       }
     | {
           type: 'checkMatrix';
-          options: { gridSize: number; sequenceLength: number; data: number[] };
+          options: { gridSize: number; sequenceLength: number; data: ArrayBufferLike };
       };
 
 export type MatrixWorkerResponse =
     | {
           type: 'generateMatrix';
           response: {
-              arrayData: number[];
+              arrayData: ArrayBuffer;
               gridSize: number;
           };
       }
@@ -61,7 +56,7 @@ onmessage = (event: MessageEvent<MatrixWorkerMessage>) => {
         const response: MatrixWorkerResponse = {
             type: 'generateMatrix',
             response: {
-                arrayData: Array.from(floatArray),
+                arrayData: floatArray.buffer,
                 gridSize
             }
         };

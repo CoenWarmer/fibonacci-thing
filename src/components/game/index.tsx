@@ -181,7 +181,7 @@ export function Game() {
                 options: {
                     gridSize,
                     sequenceLength: SEQUENCE_LENGTH,
-                    data: Array.from(matrix.current.data)
+                    data: matrix.current.data.buffer
                 }
             });
         } else {
