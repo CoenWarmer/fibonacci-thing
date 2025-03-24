@@ -1,10 +1,9 @@
 'use client';
 
-import { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import debounce from 'lodash.debounce';
 import confetti from 'canvas-confetti';
-import { AutoSizer, Grid } from 'react-virtualized';
-import 'react-virtualized/styles.css';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 import { Button } from '../atoms/Button';
 import {
@@ -41,6 +40,25 @@ export function Game() {
 
     const renderDuration = useRef<PerformanceMeasure | undefined>(undefined);
     const checkDuration = useRef<PerformanceMeasure | undefined>(undefined);
+
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    const rowVirtualizer = useVirtualizer({
+        count: gridSize,
+        getScrollElement: () => containerRef.current,
+        estimateSize: () => 40,
+        overscan: 20,
+        debug: true
+    });
+
+    const columnVirtualizer = useVirtualizer({
+        horizontal: true,
+        count: gridSize,
+        getScrollElement: () => containerRef.current,
+        estimateSize: () => 40,
+        overscan: 20,
+        debug: true
+    });
 
     // First we check the memory usage of the matrix
     useEffect(() => {
@@ -318,43 +336,50 @@ export function Game() {
                     </Box>
                 </Alert>
             ) : matrix.current ? (
-                <ElementContainer>
-                    <AutoSizer disableHeight>
-                        {({ width }) => (
-                            <Grid
-                                width={width}
-                                height={300}
-                                rowHeight={22}
-                                columnWidth={22}
-                                rowCount={gridSize}
-                                columnCount={gridSize}
-                                cellRenderer={({
-                                    columnIndex,
-                                    rowIndex,
-                                    style
-                                }: {
-                                    columnIndex: number;
-                                    rowIndex: number;
-                                    style: CSSProperties;
-                                }) => (
-                                    <Button
-                                        key={`${rowIndex}-${columnIndex}`}
-                                        value={<>{matrix.current?.get(rowIndex, columnIndex)}</>}
-                                        row={rowIndex}
-                                        col={columnIndex}
-                                        disabled={disabled}
-                                        style={style}
-                                        active={isPartOfSequence(columnIndex, rowIndex, results)}
-                                        onClick={() => handleClick(rowIndex, columnIndex)}
-                                    />
-                                )}
-                                containerStyle={{
-                                    display: 'flex',
-                                    backgroundColor: 'rgb(221, 231, 238)'
-                                }}
-                            />
-                        )}
-                    </AutoSizer>
+                <ElementContainer
+                    sx={{ maxWidth: '100%', height: 600, overflow: 'scroll' }}
+                    ref={containerRef}
+                >
+                    <div
+                        style={{
+                            height: `${rowVirtualizer.getTotalSize()}px`,
+                            width: `${columnVirtualizer.getTotalSize()}px`,
+                            position: 'relative'
+                        }}
+                    >
+                        {rowVirtualizer.getVirtualItems().map((row, rowIndex) => (
+                            <div key={row.key}>
+                                {columnVirtualizer.getVirtualItems().map((column, columnIndex) => (
+                                    <div
+                                        key={column.key}
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: `${column.size}px`,
+                                            height: `${row.size}px`,
+                                            transform: `translateX(${column.start}px) translateY(${row.start}px)`
+                                        }}
+                                    >
+                                        <Button
+                                            key={`${rowIndex}-${columnIndex}`}
+                                            big
+                                            value={matrix.current?.get(rowIndex, columnIndex)}
+                                            row={rowIndex}
+                                            col={columnIndex}
+                                            disabled={disabled}
+                                            active={isPartOfSequence(
+                                                columnIndex,
+                                                rowIndex,
+                                                results
+                                            )}
+                                            onClick={() => handleClick(rowIndex, columnIndex)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
                 </ElementContainer>
             ) : null}
         </>
