@@ -27,14 +27,14 @@
         "js-yaml": "^4.1.0",
         "lodash.debounce": "^4.0.8",
         "markdown-to-jsx": "^7.7.1",
-        "next": "^15.2.1",
+        "next": "^15.2.3",
         "react": "^19.0.0",
         "react-chartjs-2": "^5.3.0",
         "react-countup": "^6.5.3",
         "react-dom": "^19.0.0"
     },
     "devDependencies": {
-        "@stackbit/cms-git": "^1.0.2",
+        "@stackbit/cms-git": "^1.0.35",
         "@stackbit/types": "^2.0.2",
         "@types/canvas-confetti": "^1.9.0",
         "@types/glob": "^8.1.0",
