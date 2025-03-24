@@ -126,7 +126,7 @@ export function Game() {
         return () => {
             clearTimeout(timer);
         };
-    }, [count, results]);
+    }, [results]);
 
     // Clean the worker when unmounting the component
     useEffect(() => {
@@ -145,7 +145,6 @@ export function Game() {
         matrix.current?.increment(x, y);
 
         checkMatrix();
-
         setCount(count + 1);
     };
 
@@ -225,7 +224,7 @@ export function Game() {
                 setLoading(false);
             }
         }, 800),
-        []
+        [isWorkerEnabled, matrix.current]
     );
 
     const setupWorker = () => {
