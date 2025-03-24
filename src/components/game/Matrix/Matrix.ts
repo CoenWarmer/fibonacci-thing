@@ -1,6 +1,8 @@
 import { SequenceFoundResultObj } from 'src/utils/sequences';
 
 export class Matrix {
+    private rowOffsets: number[];
+
     rows: number;
     cols: number;
     data: Float32Array;
@@ -9,24 +11,27 @@ export class Matrix {
         this.rows = rows;
         this.cols = cols;
         this.data = opts.prefillArray ? new Float32Array(rows * cols) : new Float32Array();
+        this.rowOffsets = Array.from({ length: rows }, (_, i) => i * cols); // Precompute row offsets
     }
 
     // Get value at (row, col)
     get(row: number, col: number) {
-        return this.data[row * this.cols + col];
+        // return this.data[row * this.cols + col];
+        return this.data[this.rowOffsets[row] + col];
     }
 
     // Set value at (row, col)
     set(row: number, col: number, value: number): void {
-        this.data[row * this.cols + col] = value;
+        this.data[this.rowOffsets[row] + col] = value;
     }
 
     getRow(row: number): number[] {
-        return Array.from(this.data.slice(row * this.cols, row * this.cols + this.cols));
+        const start = this.rowOffsets[row];
+        return Array.from(this.data.slice(start, start + this.cols));
     }
 
     getColumn(col: number): number[] {
-        return Array.from({ length: this.rows }, (_, i) => this.data[i * this.cols + col]);
+        return Array.from({ length: this.rows }, (_, i) => this.data[this.rowOffsets[i] + col]);
     }
 
     increment(row: number, col: number): void {
@@ -38,7 +43,7 @@ export class Matrix {
     }
 
     incrementRow(row: number): void {
-        let start = row * this.rows;
+        const start = this.rowOffsets[row]; // Use precomputed row offset
         for (let j = 0; j < this.cols; j++) {
             this.data[start + j] += 1;
         }
@@ -46,7 +51,7 @@ export class Matrix {
 
     incrementColumn(col: number): void {
         for (let i = 0; i < this.rows; i++) {
-            this.data[i * this.cols + col] += 1;
+            this.data[this.rowOffsets[i] + col] += 1; // Use precomputed row offset
         }
     }
 
