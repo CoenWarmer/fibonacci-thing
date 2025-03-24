@@ -1,6 +1,7 @@
 'use client';
 
-import { CSSProperties, useEffect, useRef, useState } from 'react';
+import { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import debounce from 'lodash.debounce';
 import confetti from 'canvas-confetti';
 import { AutoSizer, Grid } from 'react-virtualized';
 import 'react-virtualized/styles.css';
@@ -126,6 +127,7 @@ export function Game() {
         matrix.current?.increment(x, y);
 
         checkMatrix();
+
         setCount(count + 1);
     };
 
@@ -176,34 +178,37 @@ export function Game() {
         setDisabled(false);
     };
 
-    const checkMatrix = () => {
-        if (!matrix.current) return;
+    const checkMatrix = useCallback(
+        debounce(() => {
+            if (!matrix.current) return;
 
-        performance.mark('start-check');
+            performance.mark('start-check');
 
-        if (isWorkerEnabled && matrixWorker.current) {
-            matrixWorker.current.postMessage({
-                type: 'checkMatrix',
-                options: {
-                    gridSize,
-                    sequenceLength: SEQUENCE_LENGTH,
-                    data: matrix.current.data.buffer
-                }
-            });
-        } else {
-            setResults(checkRowsAndColsForFibonacciSequences(matrix.current, SEQUENCE_LENGTH));
+            if (isWorkerEnabled && matrixWorker.current) {
+                matrixWorker.current.postMessage({
+                    type: 'checkMatrix',
+                    options: {
+                        gridSize,
+                        sequenceLength: SEQUENCE_LENGTH,
+                        data: matrix.current.data.buffer
+                    }
+                });
+            } else {
+                setResults(checkRowsAndColsForFibonacciSequences(matrix.current, SEQUENCE_LENGTH));
 
-            performance.mark('end-check');
-            checkDuration.current = performance.measure(
-                'Check Duration',
-                'start-check',
-                'end-check'
-            );
+                performance.mark('end-check');
+                checkDuration.current = performance.measure(
+                    'Check Duration',
+                    'start-check',
+                    'end-check'
+                );
 
-            setDisabled(false);
-            setLoading(false);
-        }
-    };
+                setDisabled(false);
+                setLoading(false);
+            }
+        }, 800),
+        []
+    );
 
     const setupWorker = () => {
         if (matrixWorker.current) return; // Worker is already set up.
