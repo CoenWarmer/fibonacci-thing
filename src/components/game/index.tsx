@@ -311,10 +311,10 @@ export function Game() {
                 perfTime={[
                     renderDuration.current === undefined
                         ? 0
-                        : Math.floor(renderDuration.current.duration),
+                        : Math.ceil(renderDuration.current.duration),
                     checkDuration.current === undefined
                         ? 0
-                        : Math.floor(checkDuration.current.duration)
+                        : Math.ceil(checkDuration.current.duration)
                 ]}
                 onSetLoading={setLoading}
                 onToggleWorker={handleToggleWorker}
